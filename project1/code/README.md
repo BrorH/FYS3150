@@ -1,2 +1,2 @@
-requirements: armadillo
-compile via: g++ -o solver solver.cpp  -larmadillo && ./solver
+requirements: armadillo \n
+compilation: g++ -o main main.cpp  -larmadillo
