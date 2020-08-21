@@ -2,6 +2,7 @@
 #include "common.h"
 
 int main() {
+  int exp = atoi(argv[1]);
   Matrix A(2, 2);
   A.set(0, 0, 2);
   A.set(1, 1, 1);

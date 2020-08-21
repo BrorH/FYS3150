@@ -4,7 +4,8 @@ class Matrix {
   // create and work with matrices of any shape.
 
 public:
-  vector<vector<double>> vals; // = new vector<vector<double>>; //[N][N];
+  vector<vector<double>> vals;
+
   int n, m;
   Matrix(int _n, int _m) {
     // M, N are size of vector
@@ -14,7 +15,7 @@ public:
     for (int i = 0; i < n; ++i)
       vals[i].resize(_m);
   }
-
+  ~Matrix() { delete[] vals }
   double operator()(int i, int j) {
     // return value at indexes i,j
     return vals[i][j];
@@ -43,16 +44,18 @@ public:
 Matrix operator*(Matrix M1, Matrix M2) {
   // calculates the product M1*M2
   assert(M1.m == M2.n); // must be right shape
+  double element;
   Matrix mulRes(M1.n, M2.m);
   for (int i = 0; i < M1.n; i++) {
     for (int j = 0; j < M2.m; j++) {
-      double element = 0;
+      element = 0;
       for (int k = 0; k < M1.m; k++) {
         element += M1(i, k) * M2(k, j);
       }
       mulRes.set(i, j, element);
     }
   }
+  delete[] element;
   return mulRes;
 }
 
