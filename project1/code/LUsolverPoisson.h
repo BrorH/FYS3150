@@ -18,7 +18,7 @@ public:
     u0 = _u0;
     u1 = _u1;
   }
-  c void setup(double _h, double _n, Mat<double> _xn) {
+  void setup(double _h, double _n, Mat<double> _xn) {
     h = _h;
     n = _n;
     xn = _xn;
