@@ -2,6 +2,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,c++,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,c++,linux
 
+
+# Dont add compiled files
+*
+!/**/
+!*.*
+
 ### C++ ###
 # Prerequisites
 *.d
