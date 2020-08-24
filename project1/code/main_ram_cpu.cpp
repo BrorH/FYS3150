@@ -131,12 +131,12 @@ void print1d(double *a, int n)
 
 double f(double x) { return 100 * pow(e, -10 * x); }
 
-void printTime(clock_t start)
+void printTime(clock_t start, string msg)
 {
 
   clock_t now = clock();
   double elapsed = ((now - start) / (double)CLOCKS_PER_SEC);
-  cout << "elapsed time: " << elapsed << endl;
+  cout << msg << ": elapsed time: " << elapsed << endl;
 }
 
 int main()
@@ -161,11 +161,11 @@ int main()
   // the old 2d indexes to the new 1d indexes
   clock_t start, finish;
   start = clock();
-  int n = (int)1e6;
+  int n = (int)1e5;
   double h = 1 / (double)n;
   double *L, *U, *b, *x;
 
-  printTime(start);
+  printTime(start, "setup");
   // fill A (not needded)
 
   // fill L
@@ -188,13 +188,13 @@ int main()
   }
 
   LUdcmp(n, L, U);
-  printTime(start);
+  printTime(start, "LUdcp");
   double *y = fwdsub(L, b, n);
-  printTime(start);
+  printTime(start, "fwsub");
   double *v = bwdsub(U, y, n);
-  printTime(start);
+  printTime(start, "bwsub");
   write(v, x, n);
-  printTime(start);
+  printTime(start, "write");
 
   delete[] L;
   delete[] U;
