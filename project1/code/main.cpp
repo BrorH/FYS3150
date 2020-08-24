@@ -174,7 +174,7 @@ int main() {
   //  -skip the matrix elements that are 0 anyway
   clock_t start, finish;
   start = clock();
-  int n = (int)1e5;
+  int n = (int)10;
   double h = 1 / (double)n;
   double **A, **L, **U, *b, *x;
   A = new double *[n];
@@ -195,6 +195,7 @@ int main() {
   // print2d(A, n);
   // print2d(L, n);
   // print2d(U, n);
+  print2d(U, n);
   printTime(start);
   double *y = fwdsubOpt(L, b, n);
   printTime(start);
