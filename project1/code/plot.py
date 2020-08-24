@@ -20,6 +20,7 @@ def read(filename):
 f = lambda y: 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
 
 x, y, n = read("num.dat")
+print("n = %G" % n)
 plt.plot(x, y, label="num")
 plt.plot(x, f(x), label="ana")
 plt.grid()
