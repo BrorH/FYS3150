@@ -159,7 +159,7 @@ int main() {
 
   // fill b and x
   // OPTIMIZATION: it is actually not neccesary to fill xn, as its value is
-  // easayly constucted from just n
+  // easily constucted from just n
   x = new double[n];
   b = new double[n];
   for (int i = 0; i < n; i++) {
