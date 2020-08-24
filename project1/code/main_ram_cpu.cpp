@@ -176,8 +176,5 @@ int main() {
   write(v, x, n);
   printTime(start);
 
-  // double *y = fwdsub(L, b, n);
-  // double *v = bwdsub(U, y, n);
-
   return 0;
 }
