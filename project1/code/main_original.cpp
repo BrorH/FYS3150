@@ -6,23 +6,30 @@
 using namespace std;
 static double e = 2.718281828459045;
 
-void LUdcmp(double **A, int n, double **L, double **U) {
+void LUdcmp(double **A, int n, double **L, double **U)
+{
   // this is general LU decomposition.
   double sum = 0;
-  for (int i = 0; i < n; i++) {
-    for (int k = i; k < n; k++) {
-      for (int j = 0; j < i; j++) {
+  for (int i = 0; i < n; i++)
+  {
+    for (int k = i; k < n; k++)
+    {
+      for (int j = 0; j < i; j++)
+      {
 
         sum += L[i][j] * U[j][k];
       }
       U[i][k] = A[i][k] - sum;
       sum = 0;
     }
-    for (int k = i; k < n; k++) {
-      if (i == k) {
+    for (int k = i; k < n; k++)
+    {
+      if (i == k)
+      {
         L[i][i] = 1;
       }
-      for (int j = 0; j < i; j++) {
+      for (int j = 0; j < i; j++)
+      {
 
         sum += L[k][j] * U[j][i];
       }
@@ -32,12 +39,15 @@ void LUdcmp(double **A, int n, double **L, double **U) {
   }
 }
 
-double *fwdsub(double **L, double *b, int n) {
+double *fwdsub(double **L, double *b, int n)
+{
   double *y = new double[n];
   y[0] = b[0] / L[0][0];
   double sum = 0;
-  for (int i = 1; i < n; i++) {
-    for (int j = 0; j < i; j++) {
+  for (int i = 1; i < n; i++)
+  {
+    for (int j = 0; j < i; j++)
+    {
       sum += L[i][j] * y[j];
     }
     y[i] = (b[i] - sum) / L[i][i];
@@ -46,12 +56,15 @@ double *fwdsub(double **L, double *b, int n) {
   return y;
 }
 
-double *bwdsub(double **U, double *b, int n) {
+double *bwdsub(double **U, double *b, int n)
+{
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n - 1][n - 1];
   double sum = 0;
-  for (int i = n - 2; i >= 0; i--) {
-    for (int j = i; j < n; j++) {
+  for (int i = n - 2; i >= 0; i--)
+  {
+    for (int j = i; j < n; j++)
+    {
       sum += U[i][j] * v[j];
     }
     v[i] = (b[i] - sum) / U[i][i];
@@ -60,38 +73,48 @@ double *bwdsub(double **U, double *b, int n) {
   return v;
 }
 
-void construct_A(double **A, int n) {
-  for (int i = 0; i < n; i++) {
+void construct_A(double **A, int n)
+{
+  for (int i = 0; i < n; i++)
+  {
     A[i][i] = 2;
-    if (i != n - 1) {
+    if (i != n - 1)
+    {
       A[i + 1][i] = -1;
       A[i][i + 1] = -1;
     }
   }
 }
 
-void write(double *v, double *x, int n) {
+void write(double *v, double *x, int n)
+{
 
   ofstream file("num.dat");
   file << n << endl;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++)
+  {
     file << v[i] << " " << x[i] << endl;
   }
   file.close();
 }
 
-void print2d(double **A, int n) {
+void print2d(double **A, int n)
+{
 
   cout << endl;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+    {
       cout << A[i][j] << " ";
     }
     cout << endl;
   }
 }
-void print1d(double *a, int n) {
-  for (int i = 0; i < n; i++) {
+void print1d(double *a, int n)
+{
+  for (int i = 0; i < n; i++)
+  {
     cout << a[i] << " ";
   }
   cout << endl;
@@ -99,14 +122,16 @@ void print1d(double *a, int n) {
 
 double f(double x) { return 100 * pow(e, -10 * x); }
 
-void printTime(clock_t start) {
+void printTime(clock_t start)
+{
 
   clock_t now = clock();
   double elapsed = ((now - start) / (double)CLOCKS_PER_SEC);
   cout << "elapsed time: " << elapsed << endl;
 }
 
-int main() {
+int main()
+{
   clock_t start, finish;
   start = clock();
   int n = (int)1e5;
@@ -117,7 +142,8 @@ int main() {
   U = new double *[n];
   b = new double[n];
   x = new double[n];
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++)
+  {
     A[i] = new double[n];
     L[i] = new double[n];
     U[i] = new double[n];
@@ -127,9 +153,7 @@ int main() {
   printTime(start);
   construct_A(A, n);
   LUdcmp(A, n, L, U);
-  // print2d(A, n);
-  // print2d(L, n);
-  // print2d(U, n);
+
   printTime(start);
   double *y = fwdsub(L, b, n);
   printTime(start);
