@@ -102,7 +102,7 @@ void write(double *v, double *x, int n)
   file << n << endl;
   for (int i = 0; i < n; i++)
   {
-    file << v[i] << " " << x[i] << endl;
+    file << v[i] << ",";
   }
 
   file.close();
