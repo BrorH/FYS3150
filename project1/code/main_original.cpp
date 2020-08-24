@@ -138,5 +138,11 @@ int main() {
   printTime(start);
   write(v, x, n);
 
+  delete[] A;
+  delete[] L;
+  delete[] U;
+  delete[] b;
+  delete[] x;
+
   return 0;
 }
