@@ -85,19 +85,18 @@ void construct_A(double **A) {
   }
 }
 
-void write(double *v, double *x, int n) {
+void write(double *v, double *x) {
 
   ofstream file("num.dat");
   file << n << endl;
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     file << v[i] << ",";
   }
 
   file.close();
 }
 
-void print2d(double **A, int n) {
+void print2d(double **A) {
 
   cout << endl;
   for (int i = 0; i < n; i++) {
@@ -107,7 +106,7 @@ void print2d(double **A, int n) {
     cout << endl;
   }
 }
-void print1d(double *a, int n) {
+void print1d(double *a) {
   for (int i = 0; i < n; i++) {
     cout << a[i] << " ";
   }
@@ -175,7 +174,7 @@ int main(int argc, char *argv[]) {
   printTime(start, "fwsub");
   double *v = bwdsub(U, y);
   printTime(start, "bwsub");
-  write(v, x, n);
+  write(v, x);
   printTime(start, "write");
 
   delete[] L;
