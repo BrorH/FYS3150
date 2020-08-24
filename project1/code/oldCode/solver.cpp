@@ -1,5 +1,9 @@
 #include "LUsolverPoisson.h"
 #include "common.h"
+static double e = 2.718281828459045;
+
+int n = 10;
+double h = 1 / ((double)n);
 
 double f(double x) { return 100 * pow(e, -10 * x); }
 
@@ -46,9 +50,8 @@ Mat<double> make_b(double *x_i, double (*f)(double)) {
 
 int main() {
   Mat<double> A;
-  static const int n = 1000;     // no. of steps (matrix width)
-  static const double h = 0.001; // funcion step length
-
+  // static const int n = 1000;     // no. of steps (matrix width)
+  // static const double h = 0.001; // funcion step length
   // Sete the proper sizes of the objects
   A.set_size(n, n);
 
@@ -59,7 +62,7 @@ int main() {
   }
 
   // get the b_ values
-  Mat<double> b_ = make_b(n, h, x_i, *f);
+  Mat<double> b_ = make_b(x_i, *f);
   // the below dat arrays can be filled with any datapoints preffered
   double adat[n - 1], bdat[n], cdat[n - 1];
   fill_n(adat, n - 1, -1);
@@ -74,29 +77,29 @@ int main() {
       A(i, i + 1) = cdat[i];
     }
   }
-
-  Mat<double> L, U; // L and U in LU decomposition
-  lu(L, U, A);      // do the decomp
-  Mat<double> y = fwdsub(L, b_);
-  Mat<double> v = bwdsub(U, y);
-  // v.print();
+  solve(A, b_).print();
+  // Mat<double> L, U; // L and U in LU decomposition
+  // lu(L, U, A);      // do the decomp
+  // Mat<double> y = fwdsub(L, b_);
+  // Mat<double> v = bwdsub(U, y);
+  // // v.print();
+  // // for (int i = 0; i < n; i++) {
+  // //   cout << x_i[i] << " ";
+  // // }
+  // // cout << endl;
+  // Mat<double> xw;
+  // xw.set_size(n, 1);
   // for (int i = 0; i < n; i++) {
-  //   cout << x_i[i] << " ";
+  //   xw[i] = x_i[i];
   // }
-  // cout << endl;
-  Mat<double> xw;
-  xw.set_size(n, 1);
-  for (int i = 0; i < n; i++) {
-    xw[i] = x_i[i];
-  }
-  ofstream file1("x.dat");
-  file1 << h << " " << n << endl;
-  xw.save(file1, csv_ascii);
-  file1.close();
-  ofstream file("v.dat");
-  file << h << " " << n << endl;
-  v.save(file, csv_ascii);
-  file.close();
-  // U.print();
+  // ofstream file1("x.dat");
+  // file1 << h << " " << n << endl;
+  // xw.save(file1, csv_ascii);
+  // file1.close();
+  // ofstream file("v.dat");
+  // file << h << " " << n << endl;
+  // v.save(file, csv_ascii);
+  // file.close();
+  // // U.print();
   return 0;
 }
