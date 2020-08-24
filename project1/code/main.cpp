@@ -7,6 +7,7 @@ using namespace std;
 static double e = 2.718281828459045;
 
 void LUdcmp(double **A, int n, double **L, double **U) {
+  // this is general LU decomposition.
   double sum = 0;
   for (int i = 0; i < n; i++) {
     for (int k = i; k < n; k++) {
@@ -28,6 +29,49 @@ void LUdcmp(double **A, int n, double **L, double **U) {
       L[k][i] = (A[k][i] - sum) / U[i][i];
       sum = 0;
     }
+  }
+}
+
+void LUdcmpOpt(double **A, int n, double **L, double **U) {
+  // this is the optimized LU decomposition that accounts for the
+  // tri-diagonal properties of A.
+  // U[i][k] = (u_ik if k=i), (-1 if k=i+1), (0 else) [u_lk def. in book]
+  // L[i][k] = (1 if k=i), (l_ik if k=i-1), (0 else) [l_ik def. in book]
+  // this optimization is just a de-foorlooping of the complete decomposition.
+  // To achieve the best optimizitaion the algorithm may have to be reworked
+  // completely from a mathematical standpoint.
+
+  // Study of the patters yield:
+  // u_ik (where k=i) = (i+2)/(i+1) for i >= 0.
+  // l_ik (where k=i-1) = -i/(i+1) for i > 0.
+  double sum = 0;
+  for (int i = 0; i < n; i++) {
+    U[i][i] = (double)(i + 2) / ((double)(i + 1));
+    U[i][i + 1] = -1;
+    L[i][i] = 1;
+    if (i > 0) {
+      L[i][i - 1] = -(double)i / ((double)(i + 1));
+    }
+    // for (int k = i; k < i + 1; k++) {
+    //   for (int j = 0; j < i; j++) {
+    //
+    //     sum += L[i][j] * U[j][k];
+    //   }
+    //   U[i][k] = A[i][k] - sum;
+    //   cout << U[i][k] << " " << i << " " << k << endl;
+    //   sum = 0;
+    // }
+    // for (int k = i; k < n; k++) {
+    //   if (i == k) {
+    //     L[i][i] = 1;
+    //   }
+    //   for (int j = 0; j < i; j++) {
+    //
+    //     sum += L[k][j] * U[j][i];
+    //   }
+    //   L[k][i] = (A[k][i] - sum) / U[i][i];
+    //   sum = 0;
+    // }
   }
 }
 
@@ -80,6 +124,8 @@ void write(double *v, double *x, int n) {
 }
 
 void print2d(double **A, int n) {
+
+  cout << endl;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       cout << A[i][j] << " ";
@@ -110,7 +156,7 @@ int main() {
   //  -skip the matrix elements that are 0 anyway
   clock_t start, finish;
   start = clock();
-  int n = 10;
+  int n = (int)1e5;
   double h = 1 / (double)n;
   double **A, **L, **U, *b, *x;
   A = new double *[n];
@@ -127,7 +173,10 @@ int main() {
   }
   printTime(start);
   construct_A(A, n);
-  LUdcmp(A, n, L, U);
+  LUdcmpOpt(A, n, L, U);
+  // print2d(A, n);
+  // print2d(L, n);
+  // print2d(U, n);
   printTime(start);
 
   double *y = fwdsub(L, b, n);
@@ -135,7 +184,7 @@ int main() {
 
   double *v = bwdsub(U, y, n);
   printTime(start);
-  write(v, x, n);
+  // write(v, x, n);
 
   return 0;
 }
