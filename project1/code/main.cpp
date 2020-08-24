@@ -226,14 +226,7 @@ int main()
 
   construct_A(A, n);
   LUdcmpOpt(A, n, L, U);
-<<<<<<< HEAD
-  // print2d(A, n);
-  // print2d(L, n);
-  // print2d(U, n);
-  print2d(U, n);
-=======
 
->>>>>>> 39be604612edcdbfddad28575365ab06448a3537
   printTime(start);
   double *y = fwdsubOpt(L, b, n);
 
