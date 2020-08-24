@@ -104,6 +104,7 @@ void write(double *v, double *x, int n)
   {
     file << v[i] << " " << x[i] << endl;
   }
+
   file.close();
 }
 
@@ -139,7 +140,7 @@ void printTime(clock_t start, string msg)
   cout << msg << ": elapsed time: " << elapsed << endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
   // To optimize ram usage, we cannot allocate such large spaces of memory to
   // the matrices. Since A is tridiagnoal, with very equal elements, we only
@@ -161,11 +162,10 @@ int main()
   // the old 2d indexes to the new 1d indexes
   clock_t start, finish;
   start = clock();
-  int n = (int)1e5;
+  int n = pow(10, atoi(argv[1]));
   double h = 1 / (double)n;
   double *L, *U, *b, *x;
 
-  printTime(start, "setup");
   // fill A (not needded)
 
   // fill L
@@ -186,6 +186,7 @@ int main()
     x[i] = i * h;
     b[i] = pow(h, 2) * f(x[i]);
   }
+  printTime(start, "setup");
 
   LUdcmp(n, L, U);
   printTime(start, "LUdcp");
