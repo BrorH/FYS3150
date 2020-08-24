@@ -56,6 +56,7 @@ Matrix operator*(Matrix M1, Matrix M2) {
     }
   }
   // delete[] element;
+
   return mulRes;
 }
 
