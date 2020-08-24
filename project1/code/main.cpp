@@ -41,7 +41,7 @@ void LUdcmpOpt(double **A, int n, double **L, double **U) {
   // To achieve the best optimizitaion the algorithm may have to be reworked
   // completely from a mathematical standpoint.
 
-  // Study of the patters yield:
+  // Study of the patters yield (PROVE THIS!!):
   // u_ik (where k=i) = (i+2)/(i+1) for i >= 0.
   // l_ik (where k=i-1) = -i/(i+1) for i > 0.
   double sum = 0;
@@ -52,30 +52,11 @@ void LUdcmpOpt(double **A, int n, double **L, double **U) {
     if (i > 0) {
       L[i][i - 1] = -(double)i / ((double)(i + 1));
     }
-    // for (int k = i; k < i + 1; k++) {
-    //   for (int j = 0; j < i; j++) {
-    //
-    //     sum += L[i][j] * U[j][k];
-    //   }
-    //   U[i][k] = A[i][k] - sum;
-    //   cout << U[i][k] << " " << i << " " << k << endl;
-    //   sum = 0;
-    // }
-    // for (int k = i; k < n; k++) {
-    //   if (i == k) {
-    //     L[i][i] = 1;
-    //   }
-    //   for (int j = 0; j < i; j++) {
-    //
-    //     sum += L[k][j] * U[j][i];
-    //   }
-    //   L[k][i] = (A[k][i] - sum) / U[i][i];
-    //   sum = 0;
-    // }
   }
 }
 
 double *fwdsub(double **L, double *b, int n) {
+  // this needs to be optimized
   double *y = new double[n];
   y[0] = b[0] / L[0][0];
   double sum = 0;
@@ -89,6 +70,20 @@ double *fwdsub(double **L, double *b, int n) {
   return y;
 }
 
+double *fwdsubOpt(double **L, double *b, int n) {
+  // The optimized version of forward substitution
+  // due to the definition of L (see comment in LUdcmpOpt) many elements of the
+  // sum in y will be 0. In fact only the L[i][i-1] and L[i][i]-terms will be
+  // non-zero. And since the sum goes from j € [0, i-1], only one term in the
+  // sum is nonzero, i.e y[i] = (b[i]-L[i][i-1]*y[i-1])/L[i][i]
+  double *y = new double[n];
+  y[0] = b[0] / L[0][0];
+  for (int i = 1; i < n; i++) {
+    y[i] = (b[i] - L[i][i - 1] * y[i - 1]) / L[i][i];
+  }
+  return y;
+}
+
 double *bwdsub(double **U, double *b, int n) {
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n - 1][n - 1];
@@ -97,6 +92,29 @@ double *bwdsub(double **U, double *b, int n) {
     for (int j = i; j < n; j++) {
       sum += U[i][j] * v[j];
     }
+    v[i] = (b[i] - sum) / U[i][i];
+    sum = 0;
+  }
+  return v;
+}
+
+double *bwdsubOpt(double **U, double *b, int n) {
+  // optimized version of bwdsub. Like in fdwsubOpt some of the elements in the
+  // sum will be 0, as only U[i][i] and U[i][i+1] will be nonzero. Unlike in
+  // fwdsubOpt both of these terms will be included in the sum, and must be
+  // accounted for. However U[i][i+1] = -1, so no need to actually look up its
+  // value when summing
+  //
+  double *v = new double[n];
+  v[n - 1] = b[n - 1] / U[n - 1][n - 1];
+  double sum = 0;
+  for (int i = n - 2; i >= 0; i--) {
+    sum += U[i][i] * v[i];
+    sum += -1 * v[i + 1];
+    // for (int j = i; j < n; j++) {
+    //   sum += U[i][j] * v[j];
+    //   cout << U[i][j] << " " << i << " " << j << endl;
+    // }
     v[i] = (b[i] - sum) / U[i][i];
     sum = 0;
   }
@@ -178,11 +196,10 @@ int main() {
   // print2d(L, n);
   // print2d(U, n);
   printTime(start);
-
-  double *y = fwdsub(L, b, n);
+  double *y = fwdsubOpt(L, b, n);
   printTime(start);
 
-  double *v = bwdsub(U, y, n);
+  double *v = bwdsubOpt(U, y, n);
   printTime(start);
   // write(v, x, n);
 
