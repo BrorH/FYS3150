@@ -100,7 +100,7 @@ double max_rel_err(double *x, double *v)
   double exact;
   double epsilon;
   double max = 0;
-  for (int i = 0; i < n; i++)
+  for (int i = 1; i < n - 1; i++)
   {
     exact = 1 - (1 - (double) pow(e, -10)) * x[i] - (double)pow(e, -10 * x[i]);
     epsilon = log10(abs((v[i] - exact) / exact));
@@ -217,12 +217,12 @@ int main(int argc, char *argv[])
   double *v = bwdsub(U, y);
   float total_time = printTime(start, "bwsub");
 
-  double max_err = max_rel_err(y, v);
+  double max_err = max_rel_err(x, v);
   write_max_err(max_err, total_time);
   printTime(start, "mxerr");
 
-  write_all(v, x, total_time);
-  printTime(start, "write");
+  // write_all(v, x, total_time);
+  // printTime(start, "write");
 
   delete[] L;
   delete[] U;
