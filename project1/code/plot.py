@@ -46,8 +46,7 @@ def multiple_n(n):
 
         ns[ni] = np.log10(n)
         times[ni] = time
-        errs[ni] = max_err
-
+        errs[ni] = np.log10(max_err)
     plt.scatter(ns, errs)
     plt.xlabel("Number of points [log10]")
     plt.ylabel("Maximum relative error [log10]")
@@ -82,4 +81,3 @@ else:
         single_n(n)
     else:
         multiple_n(n)
-
