@@ -8,8 +8,7 @@ int n;
 using namespace std;
 static double e = 2.718281828459045;
 
-void LUdcmp(double *L, double *U)
-{
+void LUdcmp(double *L, double *U) {
   // this is the optimized LU decomposition that accounts for the
   // tri-diagonal properties of A.
   // U[i][k] = (u_ik if k=i), (-1 if k=i+1), (0 else) [u_lk def. in book]
@@ -30,18 +29,15 @@ void LUdcmp(double *L, double *U)
   // U[i][i+1] -> U[0] = -1
 
   double sum = 0;
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     U[i + 1] = (double)(i + 2) / ((double)(i + 1));
-    if (i > 0)
-    {
+    if (i > 0) {
       L[i] = -(double)i / ((double)(i + 1));
     }
   }
 }
 
-double *fwdsub(double *L, double *b)
-{
+double *fwdsub(double *L, double *b) {
   // The optimized version of forward substitution
   // due to the definition of L (see comment in LUdcmp) many elements of the
   // sum in y will be 0. In fact only the L[i][i-1] and L[i][i]-terms will be
@@ -52,16 +48,14 @@ double *fwdsub(double *L, double *b)
 
   double *y = new double[n];
   y[0] = b[0];
-  for (int i = 1; i < n; i++)
-  {
+  for (int i = 1; i < n; i++) {
     y[i] = (b[i] -
             L[i + 1] * y[i - 1]); // originally also included /L[i][i]  = / 1
   }
   return y;
 }
 
-double *bwdsub(double *U, double *b)
-{
+double *bwdsub(double *U, double *b) {
   // optimized version of bwdsub. Like in fdwsub some of the elements in the
   // sum will be 0, as only U[i][i] and U[i][i+1] will be nonzero. Unlike in
   // fwdsub both of these terms will be included in the sum, and must be
@@ -72,8 +66,7 @@ double *bwdsub(double *U, double *b)
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n];
   double sum = 0;
-  for (int i = n - 2; i >= 0; i--)
-  {
+  for (int i = n - 2; i >= 0; i--) {
     sum += U[i + 1] * v[i];
     sum += -1 * v[i + 1];
     v[i] = (b[i] - sum) / U[i + 1];
@@ -82,70 +75,58 @@ double *bwdsub(double *U, double *b)
   return v;
 }
 
-void construct_A(double **A)
-{
-  for (int i = 0; i < n; i++)
-  {
+void construct_A(double **A) {
+  for (int i = 0; i < n; i++) {
     A[i][i] = 2;
-    if (i != n - 1)
-    {
+    if (i != n - 1) {
       A[i + 1][i] = -1;
       A[i][i + 1] = -1;
     }
   }
 }
 
-double max_rel_err(double *x, double *v)
-{
+double max_rel_err(double *x, double *v) {
   double exact;
   double epsilon;
   double max = 0;
-  for (int i = 1; i < n - 1; i++)
-  {
-    exact = 1 - (1 - (double) pow(e, -10)) * x[i] - (double)pow(e, -10 * x[i]);
+  for (int i = 1; i < n - 1; i++) {
+    exact = 1 - (1 - (double)pow(e, -10)) * x[i] - (double)pow(e, -10 * x[i]);
     epsilon = log10(abs((v[i] - exact) / exact));
-    if (epsilon > max) max = epsilon;
+    if (epsilon > max)
+      max = epsilon;
   }
   cout << "max err = " << max << endl;
   return max;
 }
 
-void write_all(double *v, double *x, float time)
-{
+void write_all(double *v, double *x, float time) {
   ofstream file("num.dat");
   file << n << "," << time << endl;
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     file << v[i] << ",";
   }
 
   file.close();
 }
 
-void write_max_err(double max_err, float time)
-{
+void write_max_err(double max_err, float time) {
   ofstream file("small.dat");
   file << n << "," << time << "," << max_err << endl;
   file.close();
 }
 
-void print2d(double **A, int n)
-{
+void print2d(double **A, int n) {
 
   cout << endl;
-  for (int i = 0; i < n; i++)
-  {
-    for (int j = 0; j < n; j++)
-    {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
       cout << A[i][j] << " ";
     }
     cout << endl;
   }
 }
-void print1d(double *a, int n)
-{
-  for (int i = 0; i < n; i++)
-  {
+void print1d(double *a, int n) {
+  for (int i = 0; i < n; i++) {
     cout << a[i] << " ";
   }
   cout << endl;
@@ -153,8 +134,7 @@ void print1d(double *a, int n)
 
 double f(double x) { return 100 * pow(e, -10 * x); }
 
-float printTime(clock_t start, string msg)
-{
+float printTime(clock_t start, string msg) {
 
   clock_t now = clock();
   double elapsed = ((now - start) / (double)CLOCKS_PER_SEC);
@@ -162,8 +142,7 @@ float printTime(clock_t start, string msg)
   return elapsed;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // To optimize ram usage, we cannot allocate such large spaces of memory to
   // the matrices. Since A is tridiagnoal, with very equal elements, we only
   // need to stor the two values 2 and -1 for A, knocking its size down
@@ -203,8 +182,7 @@ int main(int argc, char *argv[])
   // easily constucted from just n
   x = new double[n];
   b = new double[n];
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     x[i] = i * h;
     b[i] = pow(h, 2) * f(x[i]);
   }
@@ -221,8 +199,8 @@ int main(int argc, char *argv[])
   write_max_err(max_err, total_time);
   printTime(start, "mxerr");
 
-  // write_all(v, x, total_time);
-  // printTime(start, "write");
+  write_all(v, x, total_time);
+  printTime(start, "write");
 
   delete[] L;
   delete[] U;
