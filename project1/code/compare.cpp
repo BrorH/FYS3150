@@ -73,11 +73,6 @@ void runs(int n, int m = 3) {
 
     stop = clock();
     avg += ((stop - start) / (double)CLOCKS_PER_SEC);
-
-    // delete[] & A;
-    // delete[] & x;
-    // delete[] & b;
-    // delete[] & v;
   }
   avg = avg / (double)m;
   cout << "n = " << n << ", t = " << avg << " s." << endl;
