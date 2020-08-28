@@ -6,4 +6,3 @@ Repo for FYS3150 prosjekter.
 
 - Bror Hjemgaard; BrorH
 - Håkon Olav Torvik; haakooto
-- Johan Kroken; ?
