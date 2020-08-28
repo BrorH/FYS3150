@@ -5,6 +5,8 @@
 #include <string>
 using namespace std;
 
+// arguments: n, method, (int)write_solution
+
 int n;
 double h;
 static double e = 2.718281828459045;
