@@ -52,6 +52,21 @@ void printTime(clock_t start, string msg) {
   double elapsed = ((now - start) / (double)CLOCKS_PER_SEC);
   cout << msg << ": elapsed time: " << elapsed << endl;
 }
+
+double max_rel_err(vec *x, vec *v, int n) {
+  double exact;
+  double epsilon;
+  double max = 0;
+  for (int i = 1; i < n - 1; i++) {
+    exact = 1 - (1 - (double)pow(e, -10)) * x->operator[](i) -
+            (double)pow(e, -10 * x->operator[](i));
+    epsilon = log10(abs((v->operator[](i) - exact) / exact));
+    if (epsilon > max)
+      max = epsilon;
+  }
+  cout << "max err = " << max << endl;
+  return max;
+}
 void runs(int n, int m = 3) {
   // does m timed runs of scale n and averages their time
   clock_t start, stop;
@@ -75,11 +90,12 @@ void runs(int n, int m = 3) {
     avg += ((stop - start) / (double)CLOCKS_PER_SEC);
   }
   avg = avg / (double)m;
-  cout << "n = " << n << ", t = " << avg << " s." << endl;
+  double err = max_rel_err(&x, &v, n);
+  cout << "n = " << n << ", t = " << avg << " s. err = " << err << endl;
 }
 
 int main() {
-  int n = 1e4;
+  int n = 1e3;
   h = 1 / ((double)n);
   double res;
   runs(n);

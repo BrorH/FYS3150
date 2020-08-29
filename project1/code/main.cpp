@@ -339,7 +339,9 @@ void solve_cpu_ram(bool write_sol = false) {
   double *v = bwdsub_cpu_ram(U, y);
 
   float done = printTime(start, "done");
-  write_specs(done, max_rel_err(x, v));
+  double err = max_rel_err(x, v);
+  cout << "error: " << err << endl;
+  write_specs(done, err);
   if (write_sol) {
     write_solution(v);
   }
