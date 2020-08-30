@@ -353,13 +353,13 @@ void solve_cpu_ram(bool write_sol = false) {
   delete[] y;
   delete[] v;
 }
-
+1
 int main(int argc, char *argv[]) {
 
   n = pow(10, atoi(argv[1]));
   h = 1 / (double)n;
   string method = argv[2];
-  cout << "n: " << argv[1] << endl;
+  cout << "log10(n): " << argv[1] << endl;
 
   bool write_sol = atoi(argv[3]); // if true  solved data points will be written
 

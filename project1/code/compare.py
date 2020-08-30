@@ -30,19 +30,15 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
     # compares the runs of the original solver (unoptimized) for _n values.
     # Is able to print a latex table of the specs.dat file
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
-    if solPlot:
-        plot = 1
-    else:
-        plot = 0
     specs = []
     if solPlot:
         fig, ax = plt.subplots(3, 1, sharex=True, sharey=True)
     for n in range(1, _n + 1):
-        subprocess.run(f"./main.out {n} {type} {plot}".split(" "))
+        subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
         v = read_solution()
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
-        if solPlot:
+        if solPlot and n < 4:
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
             assert len(x) == len(v)
@@ -51,7 +47,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
             ax_.grid(True)
             ax_.legend()
     if solPlot:
-        # ax[0].set_title(f"General solution algorithm, comparison for $n$ steps")
+        # ax[0].set_title(f"General solution algorithm, comparison for {n} steps")
         ax[1].set_ylabel("$u(x)$")
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
@@ -110,8 +106,8 @@ try:
 except:
     print("error, first argument must be log(n), aka type int")
     sys.exit(1)
-assert args[1] in ["original", "cpu", "cpu_ram"], f'type must be "original", "cpu" or "cpu_ram", not {type}'
 type = args[1]
+assert args[1] in ["original", "cpu", "cpu_ram"], f'type must be "original", "cpu" or "cpu_ram", not {type}'
 for arg in args[2:]:
     try:
         params[arg] = True
