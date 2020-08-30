@@ -26,12 +26,12 @@ def read_specs():
 
 
 def plot_comparisons_original(_n):
+
     for n in range(1, _n + 1):
         subprocess.run(f"./main.out {n} original 1".split(" "))
         v = read_solution()
         n, time, max_err = read_specs()
         x = np.linspace(0, 1, n)
-        u = exact(x)
         assert len(x) == len(v)
         plt.plot(x, v, label="$\log (n) = %i$, $\epsilon_{max}$ = %.2e" % (int(np.log10(n)), max_err))
 
