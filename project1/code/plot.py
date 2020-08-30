@@ -73,28 +73,30 @@ def comparisons(_n, type="original", solPlot=False, table=True, errPlot=False, t
             y = np.log10([a[2] for a in specs])
             label = "error"
             fileExt = "err"
+            yaxis = r"\epsilon_{max}"
         else:
             y = np.log10([a[1] for a in specs])
             label = "CPU time"
             fileExt = "time"
+            yaxis = "t"
 
         n = np.log10([a[0] for a in specs])
-        plt.plot(n, y, "o", label=label)
-        a, b = tuple(np.polyfit(n, y, deg=1))
         x = np.linspace(n[0], n[-1], 1000)
+        a, b = tuple(np.polyfit(n, y, deg=1))
 
-        plt.plot(x, a * x + b, label="fitted pol, a = %.2e" % a)
-        plt.xlabel
+        plt.plot(x, a * x + b, "--", c="k", label="fitted line, a = %.2e" % a)
+
+        plt.plot(n, y, "o", c="r", label=f"${yaxis}$")
+
+        plt.xlabel("$\log (n)$")
+        plt.ylabel(f"$\log ({yaxis})$")
         plt.grid()
         plt.legend()
+        plt.xticks(range(1, _n + 1))
         plt.savefig(f"figures/{fileExt}.{type}.{_n}.png")
         plt.show()
 
 
-# comparisons(3, "original", producePlot=True, produceTable=True)
-comparisons(3, "original", solPlot=True)
-# comparisons(5, "cpu", errPlot=True)
+# comparisons(3, "original", solPlot=True)
+comparisons(5, "cpu", errPlot=True)
 # comparisons(5, "cpu", timePlot=True)
-# plot_comparisons_original(3, True)
-# table_comparisons_cpu(6)
-# table_comparisons_cpu_ram(6)
