@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
 import pandas as pd
+import sys
 
 exact = lambda y: 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
 
@@ -25,10 +26,9 @@ def read_specs():
 # ================================== #
 
 
-def comparisons(_n, type="original", solPlot=False, table=True, errPlot=False, timePlot=False):
+def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, timePlot=False):
     # compares the runs of the original solver (unoptimized) for _n values.
     # Is able to print a latex table of the specs.dat file
-    assert type in ["original", "cpu", "cpu_ram"], f'type must be "original", "cpu" or "cpu_ram", not {type}'
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
     if solPlot:
         plot = 1
@@ -97,6 +97,24 @@ def comparisons(_n, type="original", solPlot=False, table=True, errPlot=False, t
         plt.show()
 
 
+params = {"solPlot": False, "errPlot": False, "timePlot": False, "table": False}
+args = sys.argv[1:]
+try:
+    n = int(args[0])
+except:
+    print("error, first argument must be log(n), aka type int")
+    sys.exit(1)
+assert args[1] in ["original", "cpu", "cpu_ram"], f'type must be "original", "cpu" or "cpu_ram", not {type}'
+type = args[1]
+for arg in args[2:]:
+    try:
+        params[arg] = True
+    except:
+        pass
+
+comparisons(n, type, solPlot=params["solPlot"], errPlot=params["errPlot"], timePlot=params["timePlot"], table=params["table"])
+
+
 # comparisons(3, "original", solPlot=True)
-comparisons(5, "cpu", errPlot=True)
+# comparisons(5, "cpu", errPlot=True)
 # comparisons(5, "cpu", timePlot=True)
