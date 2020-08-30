@@ -219,7 +219,7 @@ double max_rel_err(double *x, double *v) {
     if (epsilon > max)
       max = epsilon;
   }
-  cout << "max err = " << max << endl;
+  // cout << "max err = " << max << endl;
   return max;
 }
 
@@ -245,7 +245,7 @@ void write_specs(float time, double max_err) {
 float printTime(clock_t start, string msg) {
   clock_t now = clock();
   double elapsed = ((now - start) / (double)CLOCKS_PER_SEC);
-  cout << msg << ": elapsed time: " << elapsed << endl;
+  // cout << msg << ": elapsed time: " << elapsed << endl;
   return elapsed;
 }
 
@@ -340,7 +340,7 @@ void solve_cpu_ram(bool write_sol = false) {
 
   float done = printTime(start, "done");
   double err = max_rel_err(x, v);
-  cout << "error: " << err << endl;
+  // cout << "error: " << err << endl;
   write_specs(done, err);
   if (write_sol) {
     write_solution(v);
@@ -359,6 +359,7 @@ int main(int argc, char *argv[]) {
   n = pow(10, atoi(argv[1]));
   h = 1 / (double)n;
   string method = argv[2];
+  cout << "n: " << n << endl;
 
   bool write_sol = atoi(argv[3]); // if true  solved data points will be written
 
