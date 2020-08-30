@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
   n = pow(10, atoi(argv[1]));
   h = 1 / (double)n;
   string method = argv[2];
-  cout << "n: " << n << endl;
+  cout << "n: " << argv[1] << endl;
 
   bool write_sol = atoi(argv[3]); // if true  solved data points will be written
 
