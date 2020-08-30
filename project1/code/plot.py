@@ -33,12 +33,15 @@ def plot_comparisons_original(_n):
         x = np.linspace(0, 1, n)
         u = exact(x)
         assert len(x) == len(v)
-        plt.plot(x, v, label="n = %i, t = %G, me = %G" % (n, time, max_err))
+        plt.plot(x, v, label="$\log (n) = %i$, $\epsilon_{max}$ = %.2e" % (int(np.log10(n)), max_err))
 
-    plt.title(f"Numerical solutions compared to analytical")
-    plt.plot(x, u, label="analytic")
+    plt.plot(x, u, "--", label="Analytical solution")
+    plt.title(f"General solution algorithm, comparison")
+    plt.xlabel("$x$")
+    plt.ylabel("$u(x)$")
     plt.grid()
     plt.legend()
+    plt.savefig("figures/generalAlgComparison.png")
     plt.show()
 
 
