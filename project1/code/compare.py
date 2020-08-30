@@ -51,7 +51,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
             ax_.grid(True)
             ax_.legend()
     if solPlot:
-        ax[0].set_title(f"General solution algorithm, comparison for $n$ steps")
+        # ax[0].set_title(f"General solution algorithm, comparison for $n$ steps")
         ax[1].set_ylabel("$u(x)$")
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
@@ -66,34 +66,40 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         specdict[r"$\epsilon_{max}$"] = [a[2] for a in specs]
         df = pd.DataFrame(specdict)
         print(df.to_latex(index=False, float_format="%.2e", label="LABEL HERE", caption="CAPTION HERE", escape=False, column_format="c" * _n))
-    if errPlot or timePlot:
-        # since the plotting of bot the errors and the cputime is similar, they can be handled at the same time
-        # this means that only one can be done at a time, but meh
-        if errPlot:
-            y = np.log10([a[2] for a in specs])
-            label = "error"
-            fileExt = "err"
-            yaxis = r"\epsilon_{max}"
-        else:
-            y = np.log10([a[1] for a in specs])
-            label = "CPU time"
-            fileExt = "time"
-            yaxis = "t"
+    if errPlot:
+        n = np.log10([a[0] for a in specs])
+        x = np.linspace(n[0], n[-1], 1000)
+        y = np.log10([a[2] for a in specs])
 
+        a, b = tuple(np.polyfit(n, y, deg=1))
+
+        plt.plot(x, a * x + b, "--", c="k", label="fitted line, a = %.2e" % a)
+
+        plt.plot(n, y, "o", c="r", label="$\epsilon_{max}$")
+
+        plt.xlabel("$\log (n)$")
+        plt.ylabel("$\log (\epsilon_{max})$")
+        plt.grid()
+        plt.legend()
+        plt.xticks(range(1, _n + 1))
+        plt.savefig(f"figures/err.{type}.{_n}.png")
+        plt.show()
+    if timePlot:
+        y = np.log10([a[1] for a in specs])
         n = np.log10([a[0] for a in specs])
         x = np.linspace(n[0], n[-1], 1000)
         a, b = tuple(np.polyfit(n, y, deg=1))
 
         plt.plot(x, a * x + b, "--", c="k", label="fitted line, a = %.2e" % a)
 
-        plt.plot(n, y, "o", c="r", label=f"${yaxis}$")
+        plt.plot(n, y, "o", c="r", label=f"$t$")
 
         plt.xlabel("$\log (n)$")
-        plt.ylabel(f"$\log ({yaxis})$")
+        plt.ylabel(f"$\log (t)$")
         plt.grid()
         plt.legend()
         plt.xticks(range(1, _n + 1))
-        plt.savefig(f"figures/{fileExt}.{type}.{_n}.png")
+        plt.savefig(f"figures/time.{type}.{_n}.png")
         plt.show()
 
 
