@@ -35,10 +35,10 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         fig, ax = plt.subplots(3, 1, sharex=True, sharey=True)
     for n in range(1, _n + 1):
         subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
-        v = read_solution()
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
         if solPlot and n < 4:
+            v = read_solution()
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
             assert len(x) == len(v)
@@ -61,7 +61,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         specdict[r"$t$ [s]"] = [a[1] for a in specs]
         specdict[r"$\epsilon_{max}$"] = [a[2] for a in specs]
         df = pd.DataFrame(specdict)
-        print(df.to_latex(index=False, float_format="%.2e", label=f"tab:{type}", caption=type, escape=False, column_format="c" * _n))
+        print("\n" + df.to_latex(index=False, float_format="%.2e", label=f"tab:{type}", caption=type, escape=False, column_format="c" * _n))
     if errPlot:
         n = np.log10([a[0] for a in specs])
         x = np.linspace(n[0], n[-1], 1000)
