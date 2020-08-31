@@ -276,6 +276,11 @@ void solve_original(bool write_sol = false) {
   if (write_sol) {
     write_solution(v);
   }
+  for (int i = 0; i < n; i++) {
+    delete[] A[i];
+    delete[] L[i];
+    delete[] U[i];
+  }
   delete[] A;
   delete[] L;
   delete[] U;
@@ -308,6 +313,11 @@ void solve_cpu(bool write_sol = false) {
   if (write_sol) {
     write_solution(v);
   }
+    for (int i = 0; i < n; i++) {
+    delete[] A[i];
+    delete[] L[i];
+    delete[] U[i];
+  }
   delete[] A;
   delete[] L;
   delete[] U;
@@ -320,7 +330,6 @@ void solve_cpu_ram(bool write_sol = false) {
   double *L, *U, *b, *x;
   L = new double[n];
   L[0] = 1;
-  ;
 
   // fill U
   U = new double[n + 1];
@@ -353,7 +362,7 @@ void solve_cpu_ram(bool write_sol = false) {
   delete[] y;
   delete[] v;
 }
-1
+
 int main(int argc, char *argv[]) {
 
   n = pow(10, atoi(argv[1]));
