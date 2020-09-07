@@ -36,12 +36,12 @@ void LUdcmp_optimized(double *L, double *U)
   // U[i][i] -> U[i+1]
   // U[i][i+1] -> U[0] = -1
 
-    for (int i = 0; i < n; i++)
+  for (double i = 0; i < n; i++)
   {
-    U[i + 1] = (double)(i + 2) / ((double)(i + 1));
+    U[(int)i + 1] = (i + 2) / ((i + 1)); // 3 FLOPS
     if (i > 0)
     {
-      L[i] = -(double)i / ((double)(i + 1));
+      L[(int)i] = -i / ((i + 1));
     }
   }
 }
