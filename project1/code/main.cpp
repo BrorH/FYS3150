@@ -82,7 +82,6 @@ void LUdcmp(double **A, double **L, double **U)
 }
 
 // ======================================================== //
-
 double *fwdsub_optimized(double *L, double *b)
 {
   // The optimized version of forward substitution
@@ -102,7 +101,6 @@ double *fwdsub_optimized(double *L, double *b)
   }
   return y;
 }
-
 double *fwdsub(double **L, double *b)
 {
   double *y = new double[n];
