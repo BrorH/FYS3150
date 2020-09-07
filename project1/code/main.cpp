@@ -69,14 +69,12 @@ void LUdcmp(double **A, double **L, double **U)
       }
       for (int j = 0; j < i; j++)
       {
-
         sum += L[k][j] * U[j][i];
       }
       L[k][i] = (A[k][i] - sum) / U[i][i];
       sum = 0;
       // cout << L[k][i] << endl;
     }
-    // cout << endl;
   }
 }
 
@@ -132,7 +130,7 @@ double *bwdsub_optimized(double *U, double *b)
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n];
   for (int i = n - 2; i >= 0; i--) // n-2 iterations
-  // whole loop: 6n-12 FLOPS
+  // whole loop: 2n-4 FLOPS
   {
     v[i] = (b[i] + v[i + 1]) / U[i + 1]; // 2 FLOPS
   }
@@ -257,6 +255,8 @@ void solve_original(bool write_sol = false)
   delete[] A;
   delete[] L;
   delete[] U;
+  delete[] y;
+  delete[] v;
   delete[] b;
   delete[] x;
 }
