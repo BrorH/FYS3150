@@ -11,7 +11,7 @@ int n;
 double h;
 static double e = 2.718281828459045;
 
-double f(double x) { return 100 * pow(e, -10 * x); }
+double f(double x) { return 100 * pow(e, -10 * x); } // 3 FLOPS
 
 // ======================================================== //
 
@@ -132,11 +132,11 @@ double *bwdsub_optimized(double *U, double *b)
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n];
   double sum = 0;
-  for (int i = n - 2; i >= 0; i--)
+  for (int i = n - 2; i >= 0; i--) // n-2 iterations
+  // whole loop: 6n-12 FLOPS
   {
-    sum += U[i + 1] * v[i];
-    sum += -1 * v[i + 1];
-    v[i] = (b[i] - sum) / U[i + 1];
+    sum += U[i + 1] * v[i] - v[i + 1]; // 3 FLOPS
+    v[i] = (b[i] - sum) / U[i + 1];    // 2 FLOPS
     sum = 0;
   }
   return v;
@@ -279,6 +279,7 @@ void solve_optimized(bool write_sol = false)
   x = new double[n];
   b = new double[n];
   for (int i = 0; i < n; i++)
+
   {
     x[i] = i * h;
     b[i] = pow(h, 2) * f(x[i]);
