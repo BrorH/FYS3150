@@ -51,7 +51,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         ax[1].set_ylabel("$u(x)$")
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
-        plt.savefig(f"f../igures/sol.{type}.{_n}.png")
+        plt.savefig(f"../figures/sol.{type}.{_n}.png")
 
         plt.show()
 

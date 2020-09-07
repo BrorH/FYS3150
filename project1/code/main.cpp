@@ -57,7 +57,6 @@ void LUdcmp(double **A, double **L, double **U)
     {
       for (int j = 0; j < i; j++)
       {
-
         sum += L[i][j] * U[j][k];
       }
       U[i][k] = A[i][k] - sum;
@@ -81,7 +80,7 @@ void LUdcmp(double **A, double **L, double **U)
   cout << cntr << endl;
 }
 
-// ======================================================== //
+// =================================================1======= //
 double *fwdsub_optimized(double *L, double *b)
 {
   // The optimized version of forward substitution
