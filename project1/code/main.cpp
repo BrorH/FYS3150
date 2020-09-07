@@ -50,15 +50,12 @@ void LUdcmp(double **A, double **L, double **U)
 {
   // this is general LU decomposition.
   double sum = 0;
-  int cntr = 0;
   for (int i = 0; i < n; i++) // n^3 FLOPS
   {
     for (int k = i; k < n; k++)
     {
       for (int j = 0; j < i; j++)
       {
-        cntr++;
-
         sum += L[i][j] * U[j][k];
       }
       U[i][k] = A[i][k] - sum;
@@ -77,9 +74,10 @@ void LUdcmp(double **A, double **L, double **U)
       }
       L[k][i] = (A[k][i] - sum) / U[i][i];
       sum = 0;
+      // cout << L[k][i] << endl;
     }
+    // cout << endl;
   }
-  cout << cntr << endl;
 }
 
 // ======================================================== //
@@ -133,13 +131,10 @@ double *bwdsub_optimized(double *U, double *b)
   // see LUdcmp for the index trickery regarding ram optimization
   double *v = new double[n];
   v[n - 1] = b[n - 1] / U[n];
-  double sum = 0;
   for (int i = n - 2; i >= 0; i--) // n-2 iterations
   // whole loop: 6n-12 FLOPS
   {
-    sum += U[i + 1] * v[i] - v[i + 1]; // 3 FLOPS
-    v[i] = (b[i] - sum) / U[i + 1];    // 2 FLOPS
-    sum = 0;
+    v[i] = (b[i] + v[i + 1]) / U[i + 1]; // 2 FLOPS
   }
   return v;
 }
@@ -312,6 +307,7 @@ int main(int argc, char *argv[])
 {
 
   n = pow(10, atoi(argv[1]));
+  // n = 10;
   h = 1 / (double)n;
   string method = argv[2];
   cout << "log10(n): " << argv[1] << endl;
