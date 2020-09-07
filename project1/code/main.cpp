@@ -38,10 +38,10 @@ void LUdcmp_optimized(double *L, double *U)
 
   for (double i = 0; i < n; i++)
   {
-    U[(int)i + 1] = (i + 2) / ((i + 1)); // 3 FLOPS
+    U[(int)i + 1] = (i + 2) / (i + 1); // 3 FLOPS
     if (i > 0)
     {
-      L[(int)i] = -i / ((i + 1));
+      L[(int)i] = -i / (i + 1); // 3 FLOPS
     }
   }
 }
@@ -96,7 +96,7 @@ double *fwdsub_optimized(double *L, double *b)
   for (int i = 1; i < n; i++)
   {
     y[i] = (b[i] -
-            L[i + 1] * y[i - 1]); // originally also included /L[i][i]  = / 1
+            L[i + 1] * y[i - 1]); //2 FLOPS
   }
   return y;
 }
