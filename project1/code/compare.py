@@ -51,7 +51,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         ax[1].set_ylabel("$u(x)$")
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
-        plt.savefig(f"figures/sol.{type}.{_n}.png")
+        plt.savefig(f"f../igures/sol.{type}.{_n}.png")
 
         plt.show()
 
@@ -78,7 +78,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.grid()
         plt.legend()
         plt.xticks(range(1, _n + 1))
-        plt.savefig(f"figures/err.{type}.{_n}.png")
+        plt.savefig(f"../figures/err.{type}.{_n}.png")
         plt.show()
     if timePlot:
         y = np.log10([a[1] for a in specs])
@@ -95,7 +95,7 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.grid()
         plt.legend()
         plt.xticks(range(1, _n + 1))
-        plt.savefig(f"figures/time.{type}.{_n}.png")
+        plt.savefig(f"../figures/time.{type}.{_n}.png")
         plt.show()
 
 
