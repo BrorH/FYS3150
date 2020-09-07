@@ -36,7 +36,7 @@ void LUdcmp_optimized(double *L, double *U)
   // U[i][i] -> U[i+1]
   // U[i][i+1] -> U[0] = -1
 
-  for (double i = 0; i < n; i++)
+  for (double i = 0; i < n; i++) // n operations: 6n FLOPS
   {
     U[(int)i + 1] = (i + 2) / (i + 1); // 3 FLOPS
     if (i > 0)
@@ -93,7 +93,7 @@ double *fwdsub_optimized(double *L, double *b)
 
   double *y = new double[n];
   y[0] = b[0];
-  for (int i = 1; i < n; i++)
+  for (int i = 1; i < n; i++) // n-1 iterations: 2n FLOPS
   {
     y[i] = (b[i] -
             L[i + 1] * y[i - 1]); //2 FLOPS
@@ -104,15 +104,16 @@ double *fwdsub_optimized(double *L, double *b)
 double *fwdsub(double **L, double *b)
 {
   double *y = new double[n];
-  y[0] = b[0] / L[0][0];
+  y[0] = b[0] / L[0][0]; // 1 FLOP
   double sum = 0;
-  for (int i = 1; i < n; i++)
+  for (int i = 1; i < n; i++) // n iterations: n^2+3n FLOPS
+
   {
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < i; j++) // (n^2+n)/2 iterations: (n^2+n)/2 * 2 FLOPS
     {
-      sum += L[i][j] * y[j];
+      sum += L[i][j] * y[j]; // 2 FLOPS
     }
-    y[i] = (b[i] - sum) / L[i][i];
+    y[i] = (b[i] - sum) / L[i][i]; // 2 FLOPS
     sum = 0;
   }
   return y;
@@ -145,15 +146,15 @@ double *bwdsub_optimized(double *U, double *b)
 double *bwdsub(double **U, double *b)
 {
   double *v = new double[n];
-  v[n - 1] = b[n - 1] / U[n - 1][n - 1];
+  v[n - 1] = b[n - 1] / U[n - 1][n - 1]; // 1 FLOP
   double sum = 0;
-  for (int i = n - 2; i >= 0; i--)
+  for (int i = n - 2; i >= 0; i--) // n-2 iterations: n^2+3n FLOPS
   {
-    for (int j = i; j < n; j++)
+    for (int j = i; j < n; j++) //  (n^2+n)/2 *2 FLOPS
     {
-      sum += U[i][j] * v[j];
+      sum += U[i][j] * v[j]; // 2 FLOPS
     }
-    v[i] = (b[i] - sum) / U[i][i];
+    v[i] = (b[i] - sum) / U[i][i]; // 2 FLOPS
     sum = 0;
   }
   return v;
