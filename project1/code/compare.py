@@ -32,12 +32,12 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
     specs = []
     if solPlot:
-        fig, ax = plt.subplots(3, 1, sharex=True, sharey=True)
+        fig, ax = plt.subplots(_n, 1, sharex=True, sharey=True)
     for n in range(1, _n + 1):
         subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
-        if solPlot and n < 4:
+        if solPlot:# and n < 4:
             v = read_solution()
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
@@ -107,7 +107,7 @@ except:
     print("error, first argument must be log(n), aka type int")
     sys.exit(1)
 type = args[1]
-assert args[1] in ["original", "cpu", "cpu_ram"], f'type must be "original", "cpu" or "cpu_ram", not {type}'
+assert args[1] in ["original", "optimized"], f'type must be "original" or "optimized", not {type}'
 for arg in args[2:]:
     try:
         params[arg] = True
