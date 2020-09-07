@@ -50,12 +50,14 @@ void LUdcmp(double **A, double **L, double **U)
 {
   // this is general LU decomposition.
   double sum = 0;
-  for (int i = 0; i < n; i++)
+  int cntr = 0;
+  for (int i = 0; i < n; i++) // n^3 FLOPS
   {
     for (int k = i; k < n; k++)
     {
       for (int j = 0; j < i; j++)
       {
+        cntr++;
 
         sum += L[i][j] * U[j][k];
       }
@@ -77,6 +79,7 @@ void LUdcmp(double **A, double **L, double **U)
       sum = 0;
     }
   }
+  cout << cntr << endl;
 }
 
 // ======================================================== //
