@@ -93,8 +93,7 @@ double *fwdsub_optimized(double *L, double *b)
   y[0] = b[0];
   for (int i = 1; i < n; i++) // n-1 iterations: 2n FLOPS
   {
-    y[i] = (b[i] -
-            L[i] * y[i - 1]); //2 FLOPS
+    y[i] = (b[i] - L[i] * y[i - 1]); //2 FLOPS
   }
   return y;
 }
@@ -220,7 +219,6 @@ float printTime(clock_t start, string msg)
 
 void solve_original(bool write_sol = false)
 {
-  clock_t start = clock();
   double **A, **L, **U, *b, *x;
   A = new double *[n];
   L = new double *[n];
@@ -236,11 +234,13 @@ void solve_original(bool write_sol = false)
     b[i] = pow(h, 2) * f(x[i]);
   }
   construct_A(A);
+
+  clock_t start = clock();
   LUdcmp(A, L, U);
   double *y = fwdsub(L, b);
   double *v = bwdsub(U, y);
-
   float done = printTime(start, "done");
+
   write_specs(done, max_rel_err(x, v));
   if (write_sol)
   {
@@ -263,7 +263,6 @@ void solve_original(bool write_sol = false)
 
 void solve_optimized(bool write_sol = false)
 {
-  clock_t start = clock();
   double *L, *U, *b, *x;
   L = new double[n];
   L[0] = 1;
@@ -283,10 +282,11 @@ void solve_optimized(bool write_sol = false)
   }
 
   LUdcmp_optimized(L, U);
+  clock_t start = clock();
   double *y = fwdsub_optimized(L, b);
   double *v = bwdsub_optimized(U, y);
-
   float done = printTime(start, "done");
+
   double err = max_rel_err(x, v);
   // cout << "error: " << err << endl;
   write_specs(done, err);
