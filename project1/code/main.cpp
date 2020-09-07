@@ -21,7 +21,7 @@ void LUdcmp_optimized(double *L, double *U)
   // tri-diagonal properties of A.
   // U[i][k] = (u_ik if k=i), (-1 if k=i+1), (0 else) [u_lk def. in book]
   // L[i][k] = (1 if k=i), (l_ik if k=i-1), (0 else) [l_ik def. in book]
-  // this optimization is just a de-foorlooping of the complete decomposition.
+  // this optiouble sum = 0;mization is just a de-foorlooping of the complete decomposition.
   // To achieve the best optimizitaion the algorithm may have to be reworked
   // completely from a mathematical standpoint.
 
@@ -36,8 +36,7 @@ void LUdcmp_optimized(double *L, double *U)
   // U[i][i] -> U[i+1]
   // U[i][i+1] -> U[0] = -1
 
-  double sum = 0;
-  for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
   {
     U[i + 1] = (double)(i + 2) / ((double)(i + 1));
     if (i > 0)
