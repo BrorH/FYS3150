@@ -8,6 +8,8 @@
 !/**/
 !*.*
 
+.vscode
+
 ### C++ ###
 # Prerequisites
 *.d
