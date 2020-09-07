@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import subprocess
 import pandas as pd
 import sys
-
+import os
 exact = lambda y: 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
 
 
@@ -22,11 +22,18 @@ def read_specs():
     max_err = float(line[2])
     return n, time, max_err
 
+def pushFile(filename):
+    path = os.path.abspath(filename)
+    print(path)
+    subprocess.run(f"git add {path}".split())
+    subprocess.run(f'git commit -m "automatic_figure_update" --quiet'.split())
+    subprocess.run(f"git push --quiet".split())
+    print("done")
 
 # ================================== #
 
 
-def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, timePlot=False):
+def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, timePlot=False, push=False):
     # compares the runs of the original solver (unoptimized) for _n values.
     # Is able to print a latex table of the specs.dat file
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
@@ -52,7 +59,8 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
         plt.savefig(f"../figures/sol.{type}.{_n}.png")
-
+        if push:
+            pushFile(f"../figures/sol.{type}.{_n}.png")
         plt.show()
 
     if table:
@@ -79,6 +87,8 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.legend()
         plt.xticks(range(1, _n + 1))
         plt.savefig(f"../figures/err.{type}.{_n}.png")
+        if push:
+            pushFile(f"../figures/err.{type}.{_n}.png")
         plt.show()
     if timePlot:
         y = np.log10([a[1] for a in specs])
@@ -96,10 +106,12 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.legend()
         plt.xticks(range(1, _n + 1))
         plt.savefig(f"../figures/time.{type}.{_n}.png")
+        if push:
+            pushFile(f"../figures/time.{type}.{_n}.png")
         plt.show()
 
 
-params = {"solPlot": False, "errPlot": False, "timePlot": False, "table": False}
+params = {"solPlot": False, "errPlot": False, "timePlot": False, "table": False, "push":False}
 args = sys.argv[1:]
 try:
     n = int(args[0])
@@ -114,4 +126,4 @@ for arg in args[2:]:
     except:
         pass
 
-comparisons(n, type, solPlot=params["solPlot"], errPlot=params["errPlot"], timePlot=params["timePlot"], table=params["table"])
+comparisons(n, type, solPlot=params["solPlot"], errPlot=params["errPlot"], timePlot=params["timePlot"], table=params["table"], push=params["push"])
