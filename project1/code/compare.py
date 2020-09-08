@@ -4,12 +4,34 @@ import subprocess
 import pandas as pd
 import sys
 import os
+import matplotlib
+matplotlib.use(plt.get_backend())
+
+"""
+Plotting code
+
+ n: int
+    - log(n), size of matrix
+ type: string
+    - "original" or "optimized". Method of solution
+ plot: string, optional 
+    - can be either and/or all of: 
+        - solPlot: Plots numerical solution compared to analytical
+        - errPlot: Logarithmically plots the max relative error
+        - timePlot: Logarithmically plots the elapsed time
+        - noshow: Saves plots without showing them on screen
+ table: string, optional
+    - if "table"; writes LaTeX formatted table of error and time. else none
+ push: string, optional
+    - if "push"; automatically pushes new figures to github 
+
+"""
 
 font = {"family": "DejaVu Sans", "weight": "bold", "size": 22}
 plt.rc("font", **font)
 
 
-exact = lambda y: 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
+def exact(y): return 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
 
 
 def read_solution():
@@ -37,11 +59,9 @@ def read_specs():
 
 def pushFile(filename):
     path = os.path.abspath(filename)
-    print(path)
     subprocess.run(f"git add {path}".split())
     subprocess.run(f'git commit -m "automatic_figure_update" --quiet'.split())
     subprocess.run(f"git push --quiet".split())
-    print("done")
 
 
 # ================================== #
@@ -72,7 +92,8 @@ def comparisons(
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
             assert len(x) == len(v)
-            ax_.plot(x, v, lw=4, label="$\log (n) = %i$" % int(np.log10(N)), c="r")
+            ax_.plot(x, v, lw=4, label="$\log (n) = %i$" %
+                     int(np.log10(N)), c="r")
             ax_.plot(x, exact(x), "--", lw=3, label="Analytical", c="k")
             ax_.grid(True)
             ax_.legend()
@@ -114,7 +135,8 @@ def comparisons(
 
         a, b = tuple(np.polyfit(n, y, deg=1))
 
-        plt.plot(x, a * x + b, "--", c="k", lw=3, label="fitted line, a = %.2e" % a)
+        plt.plot(x, a * x + b, "--", c="k", lw=3,
+                 label="fitted line, a = %.2e" % a)
 
         plt.plot(n, y, "o", c="r", ms=15, label="$\epsilon_{max}$")
 
@@ -137,7 +159,8 @@ def comparisons(
         x = np.linspace(n[0], n[-1], 1000)
         a, b = tuple(np.polyfit(n, y, deg=1))
 
-        plt.plot(x, a * x + b, "--", c="k", lw=3, label="fitted line, a = %.2e" % a)
+        plt.plot(x, a * x + b, "--", c="k", lw=3,
+                 label="fitted line, a = %.2e" % a)
 
         plt.plot(n, y, "o", c="r", ms=15, label=f"$t$")
 
