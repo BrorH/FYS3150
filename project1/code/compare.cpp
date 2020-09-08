@@ -64,7 +64,9 @@ double max_rel_err(vec *x, vec *v, int n)
   {
     exact = 1 - (1 - (double)pow(e, -10)) * x->operator[](i) -
             (double)pow(e, -10 * x->operator[](i));
+    exact = exact / h / h;
     epsilon = log10(abs((v->operator[](i) - exact) / exact));
+    epsilon = abs(epsilon);
     if (epsilon > max)
       max = epsilon;
   }
