@@ -40,16 +40,10 @@ void construct_A(mat *A, int n)
     }
   }
 }
-void write(vec *v, int n)
+void write_specs(int n, double avg, double err)
 {
-
-  ofstream file("num.dat");
-  file << n << endl;
-  for (int i = 0; i < n; i++)
-  {
-    file << (*v)(i) << ",";
-  }
-
+  ofstream file("arma.dat");
+  file << n << "," << avg << "," << err << endl;
   file.close();
 }
 
@@ -74,18 +68,19 @@ double max_rel_err(vec *x, vec *v, int n)
     if (epsilon > max)
       max = epsilon;
   }
-  cout << "max err = " << max << endl;
+  // cout << "max err = " << max << endl;
   return max;
 }
 void runs(int n, int m = 5)
 {
   // does m timed runs of scale n and averages their time
-  clock_t start, stop;
+  clock_t start;
   double avg;
   mat A(n, n);
   vec x(n);
   vec b(n);
   vec v;
+
   for (int i = 0; i < m; i++)
   {
     start = clock();
@@ -99,20 +94,22 @@ void runs(int n, int m = 5)
     construct_b(&b, &x, n);
     v = solve(A, b);
 
-    stop = clock();
-    avg += ((stop - start) / (double)CLOCKS_PER_SEC);
+    // stop = clock();
+    avg += ((clock() - start) / (double)CLOCKS_PER_SEC);
   }
   avg = avg / (double)m;
   double err = max_rel_err(&x, &v, n);
   cout << "n = " << n << ", t = " << avg << " s. err = " << err << endl;
+  write_specs(n, avg, err);
 }
 
 int main(int argc, char *argv[])
 {
   int n = pow(10, atoi(argv[1]));
   h = 1 / ((double)n);
-  double res;
-  runs(n);
+  // double res;
+  int m = 5;
+  runs(n, m);
   //
   // clock_t start, finish;
   // start = clock();
