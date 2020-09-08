@@ -22,18 +22,18 @@ push = "push" in sys.argv
 N = int(sys.argv[1])
 
 
-n = np.zeros(N - 1)
-t = np.zeros(N - 1)
-e = np.zeros(N - 1)
+n = np.zeros(N)
+t = np.zeros(N)
+e = np.zeros(N)
 
-for i in range(1, N):
+for i in range(N):
     subprocess.run(f"./arma.out {i + 1}".split())
 
     with open("arma.dat", "r") as file:
         _n, _t, _e = file.readline().strip().split(",")
-    n[i - 1] = np.log10(int(_n))
-    t[i - 1] = np.log10(float(_t))
-    e[i - 1] = np.log10(float(_e))
+    n[i] = np.log10(int(_n))
+    t[i] = np.log10(float(_t))
+    e[i] = np.log10(float(_e))
 
 x = np.linspace(n[0], n[-1], 1000)
 at, bt = np.polyfit(n, t, 1)
