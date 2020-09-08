@@ -53,9 +53,10 @@ def comparisons(
     # Is able to print a latex table of the specs.dat file
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
     specs = []
+    min = 1
     if solPlot:
         fig, ax = plt.subplots(_n, 1, sharex=True, sharey=True)
-    for n in range(1, _n + 1):
+    for n in range(min, _n + 1):
         subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
@@ -77,9 +78,9 @@ def comparisons(
         mng.resize(*mng.window.maxsize())
         fig = plt.gcf()
         fig.set_size_inches((16, 11), forward=False)
-        fig.savefig(f"../figures/sol.{type}.{_n}.png")
+        fig.savefig(f"../figures/sol.{type}.{min}_{_n}.png")
         if push:
-            pushFile(f"../figures/sol.{type}.{_n}.png")
+            pushFile(f"../figures/sol.{type}.{min}_{_n}.png")
         plt.show()
 
     if table:
@@ -119,9 +120,9 @@ def comparisons(
         mng.resize(*mng.window.maxsize())
         fig = plt.gcf()
         fig.set_size_inches((9, 11), forward=False)
-        fig.savefig(f"../figures/err.{type}.{_n}.png")
+        fig.savefig(f"../figures/err.{type}.{min}_{_n}.png")
         if push:
-            pushFile(f"../figures/err.{type}.{_n}.png")
+            pushFile(f"../figures/err.{type}.{min}_{_n}.png")
         plt.show()
     if timePlot:
         y = np.log10([a[1] for a in specs])
@@ -142,9 +143,9 @@ def comparisons(
         mng.resize(*mng.window.maxsize())
         fig = plt.gcf()
         fig.set_size_inches((9, 11), forward=False)
-        fig.savefig(f"../figures/time.{type}.{_n}.png")
+        fig.savefig(f"../figures/time.{type}.{min}_{_n}.png")
         if push:
-            pushFile(f"../figures/time.{type}.{_n}.png")
+            pushFile(f"../figures/time.{type}.{min}_{_n}.png")
         plt.show()
 
 
