@@ -60,7 +60,7 @@ def comparisons(
     # Is able to print a latex table of the specs.dat file
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
     specs = []
-    min = 1
+    min = 3
     if solPlot:
         fig, ax = plt.subplots(_n, 1, sharex=True, sharey=True)
     for n in range(min, _n + 1):
@@ -72,8 +72,8 @@ def comparisons(
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
             assert len(x) == len(v)
-            ax_.plot(x, v, label="$\log (n) = %i$" % int(np.log10(N)), c="r")
-            ax_.plot(x, exact(x), "--", label="Analytical", c="k")
+            ax_.plot(x, v, lw=4, label="$\log (n) = %i$" % int(np.log10(N)), c="r")
+            ax_.plot(x, exact(x), "--", lw=3, label="Analytical", c="k")
             ax_.grid(True)
             ax_.legend()
     if solPlot:
@@ -114,9 +114,9 @@ def comparisons(
 
         a, b = tuple(np.polyfit(n, y, deg=1))
 
-        plt.plot(x, a * x + b, "--", c="k", label="fitted line, a = %.2e" % a)
+        plt.plot(x, a * x + b, "--", c="k", lw=3, label="fitted line, a = %.2e" % a)
 
-        plt.plot(n, y, "o", c="r", label="$\epsilon_{max}$")
+        plt.plot(n, y, "o", c="r", ms=15, label="$\epsilon_{max}$")
 
         plt.xlabel("$\log (n)$")
         plt.ylabel("$\log (\epsilon_{max})$")
@@ -126,7 +126,7 @@ def comparisons(
         mng = plt.get_current_fig_manager()
         mng.resize(*mng.window.maxsize())
         fig = plt.gcf()
-        fig.set_size_inches((9, 11), forward=False)
+        fig.set_size_inches((14, 11), forward=False)
         fig.savefig(f"../figures/err.{type}.{min}_{_n}.png")
         if push:
             pushFile(f"../figures/err.{type}.{min}_{_n}.png")
@@ -137,9 +137,9 @@ def comparisons(
         x = np.linspace(n[0], n[-1], 1000)
         a, b = tuple(np.polyfit(n, y, deg=1))
 
-        plt.plot(x, a * x + b, "--", c="k", label="fitted line, a = %.2e" % a)
+        plt.plot(x, a * x + b, "--", c="k", lw=3, label="fitted line, a = %.2e" % a)
 
-        plt.plot(n, y, "o", c="r", label=f"$t$")
+        plt.plot(n, y, "o", c="r", ms=15, label=f"$t$")
 
         plt.xlabel("$\log (n)$")
         plt.ylabel(f"$\log (t)$")
