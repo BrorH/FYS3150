@@ -19,6 +19,13 @@ def read_solution():
     return v
 
 
+def show():
+    if "noshow" in sys.argv:
+        plt.clf()
+    else:
+        plt.show()
+
+
 def read_specs():
     with open("specs.dat", "r+") as file:
         line = file.readlines()[0].strip().split(",")
@@ -81,7 +88,7 @@ def comparisons(
         fig.savefig(f"../figures/sol.{type}.{min}_{_n}.png")
         if push:
             pushFile(f"../figures/sol.{type}.{min}_{_n}.png")
-        plt.show()
+        show()
 
     if table:
         specdict = {}
@@ -123,7 +130,7 @@ def comparisons(
         fig.savefig(f"../figures/err.{type}.{min}_{_n}.png")
         if push:
             pushFile(f"../figures/err.{type}.{min}_{_n}.png")
-        plt.show()
+        show()
     if timePlot:
         y = np.log10([a[1] for a in specs])
         n = np.log10([a[0] for a in specs])
@@ -146,7 +153,7 @@ def comparisons(
         fig.savefig(f"../figures/time.{type}.{min}_{_n}.png")
         if push:
             pushFile(f"../figures/time.{type}.{min}_{_n}.png")
-        plt.show()
+        show()
 
 
 params = {
