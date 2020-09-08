@@ -4,6 +4,11 @@ import subprocess
 import pandas as pd
 import sys
 import os
+
+font = {"family": "DejaVu Sans", "weight": "bold", "size": 22}
+plt.rc("font", **font)
+
+
 exact = lambda y: 1 - (1 - np.exp(-10)) * y - np.exp(-10 * y)
 
 
@@ -22,6 +27,7 @@ def read_specs():
     max_err = float(line[2])
     return n, time, max_err
 
+
 def pushFile(filename):
     path = os.path.abspath(filename)
     print(path)
@@ -30,21 +36,30 @@ def pushFile(filename):
     subprocess.run(f"git push --quiet".split())
     print("done")
 
+
 # ================================== #
 
 
-def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, timePlot=False, push=False):
+def comparisons(
+    _n,
+    type="original",
+    solPlot=False,
+    table=False,
+    errPlot=False,
+    timePlot=False,
+    push=False,
+):
     # compares the runs of the original solver (unoptimized) for _n values.
     # Is able to print a latex table of the specs.dat file
     print(f"comparing. type: {type}, n: {_n}, plot: {solPlot}, table: {table}")
     specs = []
     if solPlot:
         fig, ax = plt.subplots(_n, 1, sharex=True, sharey=True)
-    for n in range(1, _n + 1):
+    for n in range(2, _n + 1):
         subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
-        if solPlot:# and n < 4:
+        if solPlot:  # and n < 4:
             v = read_solution()
             x = np.linspace(0, 1, N)
             ax_ = ax[n - 1]
@@ -58,7 +73,11 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         ax[1].set_ylabel("$u(x)$")
         ax[2].set_xlabel("$x$")
         plt.subplots_adjust(hspace=0.1)
-        plt.savefig(f"../figures/sol.{type}.{_n}.png")
+        mng = plt.get_current_fig_manager()
+        mng.resize(*mng.window.maxsize())
+        fig = plt.gcf()
+        fig.set_size_inches((16, 11), forward=False)
+        fig.savefig(f"../figures/sol.{type}.{_n}.png")
         if push:
             pushFile(f"../figures/sol.{type}.{_n}.png")
         plt.show()
@@ -69,7 +88,17 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         specdict[r"$t$ [s]"] = [a[1] for a in specs]
         specdict[r"$\epsilon_{max}$"] = [a[2] for a in specs]
         df = pd.DataFrame(specdict)
-        print("\n" + df.to_latex(index=False, float_format="%.2e", label=f"tab:{type}", caption=type, escape=False, column_format="c" * _n))
+        print(
+            "\n"
+            + df.to_latex(
+                index=False,
+                float_format="%.2e",
+                label=f"tab:{type}",
+                caption=type,
+                escape=False,
+                column_format="c" * _n,
+            )
+        )
     if errPlot:
         n = np.log10([a[0] for a in specs])
         x = np.linspace(n[0], n[-1], 1000)
@@ -86,7 +115,11 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.grid()
         plt.legend()
         plt.xticks(range(1, _n + 1))
-        plt.savefig(f"../figures/err.{type}.{_n}.png")
+        mng = plt.get_current_fig_manager()
+        mng.resize(*mng.window.maxsize())
+        fig = plt.gcf()
+        fig.set_size_inches((9, 11), forward=False)
+        fig.savefig(f"../figures/err.{type}.{_n}.png")
         if push:
             pushFile(f"../figures/err.{type}.{_n}.png")
         plt.show()
@@ -105,13 +138,23 @@ def comparisons(_n, type="original", solPlot=False, table=False, errPlot=False, 
         plt.grid()
         plt.legend()
         plt.xticks(range(1, _n + 1))
-        plt.savefig(f"../figures/time.{type}.{_n}.png")
+        mng = plt.get_current_fig_manager()
+        mng.resize(*mng.window.maxsize())
+        fig = plt.gcf()
+        fig.set_size_inches((9, 11), forward=False)
+        fig.savefig(f"../figures/time.{type}.{_n}.png")
         if push:
             pushFile(f"../figures/time.{type}.{_n}.png")
         plt.show()
 
 
-params = {"solPlot": False, "errPlot": False, "timePlot": False, "table": False, "push":False}
+params = {
+    "solPlot": False,
+    "errPlot": False,
+    "timePlot": False,
+    "table": False,
+    "push": False,
+}
 args = sys.argv[1:]
 try:
     n = int(args[0])
@@ -119,11 +162,22 @@ except:
     print("error, first argument must be log(n), aka type int")
     sys.exit(1)
 type = args[1]
-assert args[1] in ["original", "optimized"], f'type must be "original" or "optimized", not {type}'
+assert args[1] in [
+    "original",
+    "optimized",
+], f'type must be "original" or "optimized", not {type}'
 for arg in args[2:]:
     try:
         params[arg] = True
     except:
         pass
 
-comparisons(n, type, solPlot=params["solPlot"], errPlot=params["errPlot"], timePlot=params["timePlot"], table=params["table"], push=params["push"])
+comparisons(
+    n,
+    type,
+    solPlot=params["solPlot"],
+    errPlot=params["errPlot"],
+    timePlot=params["timePlot"],
+    table=params["table"],
+    push=params["push"],
+)
