@@ -177,7 +177,9 @@ double max_rel_err(double *x, double *v)
   for (int i = 1; i < n - 1; i++)
   {
     exact = 1 - (1 - (double)pow(e, -10)) * x[i] - (double)pow(e, -10 * x[i]);
+    exact = exact / pow(h, 2);
     epsilon = log10(abs((v[i] - exact) / exact));
+    epsilon = abs(epsilon);
     if (epsilon > max)
       max = epsilon;
   }
