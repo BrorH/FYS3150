@@ -55,7 +55,7 @@ def comparisons(
     specs = []
     if solPlot:
         fig, ax = plt.subplots(_n, 1, sharex=True, sharey=True)
-    for n in range(2, _n + 1):
+    for n in range(1, _n + 1):
         subprocess.run(f"./main.out {n} {type} {int(solPlot)}".split(" "))
         N, time, max_err = read_specs()
         specs.append([N, time, max_err])
