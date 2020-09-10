@@ -11,10 +11,10 @@ Program arguments:
  - method ("original" or "optimized"): method of solution
  - write_solution (boolean int): write all solution points to solutions.dat. Takes long time for high n
 
- Written by 
- - Bror Hjemgaard, bahjemga@uio.no 
+ Written by
+ - Bror Hjemgaard, bahjemga@uio.no
  - Håkon Olav Torvik, haakooto@uio.no
- 
+
  In most loops, the individual FLOPS are noted. Condition statements are omitted.
 */
 
@@ -46,13 +46,14 @@ void LUdcmp_optimized(double *L, double *U)
 void LUdcmp(double **A, double **L, double **U)
 {
   /*
-  General LU-decomposition for matrix A. 
-  This is methodically identical to the mathematical decomposition, 
+  General LU-decomposition for matrix A.
+  This is methodically identical to the mathematical decomposition,
   and according to Wikipedia using this algorithm requires 2/3 n^3 FLOPS: O(n^3).
   (https://en.wikipedia.org/wiki/LU_decomposition#Using_Gaussian_elimination)
   */
 
   double sum = 0;
+  int count = 0;  // FLOP-counter
   for (int i = 0; i < n; i++)
   {
     for (int k = i; k < n; k++)
@@ -60,7 +61,9 @@ void LUdcmp(double **A, double **L, double **U)
       for (int j = 0; j < i; j++)
       {
         sum += L[i][j] * U[j][k];
+        count += 2;
       }
+      count ++;
       U[i][k] = A[i][k] - sum;
       sum = 0;
     }
@@ -73,11 +76,14 @@ void LUdcmp(double **A, double **L, double **U)
       for (int j = 0; j < i; j++)
       {
         sum += L[k][j] * U[j][i];
+        count += 2;
       }
+      count += 2;
       L[k][i] = (A[k][i] - sum) / U[i][i];
       sum = 0;
     }
   }
+cout << "Count for FLOPS in LU for n = " << n << " is " << count << endl;
 }
 
 // ======================================================== //
