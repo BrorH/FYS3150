@@ -1,14 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/python,c++,linux
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,c++,linux
-
-
-# Dont add compiled files
-*
-!/**/
-!*.*
-
-.vscode
+# Created by https://www.toptal.com/developers/gitignore/api/python,linux,c++
+# Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,c++
 
 ### C++ ###
 # Prerequisites
@@ -161,6 +153,9 @@ __pypackages__/
 celerybeat-schedule
 celerybeat.pid
 
+*.dat
+dat.*
+
 # SageMath parsed files
 *.sage.py
 
@@ -194,4 +189,4 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# End of https://www.toptal.com/developers/gitignore/api/python,c++,linux
+# End of https://www.toptal.com/developers/gitignore/api/python,linux,c++
