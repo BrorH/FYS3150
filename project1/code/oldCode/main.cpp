@@ -21,7 +21,7 @@ class LUsolverPoisson {
   double (*f)(double);
 
 public:
-  LUsolverPoisson(double (*_f)(double), Matrix *_xn) {
+  LUsolverPoisson(double (*_f)(*(double)), Matrix *_xn) {
     f = _f;
     xn = _xn;
     n = xn->m;
