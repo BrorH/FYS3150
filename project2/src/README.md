@@ -18,6 +18,7 @@ When written, will take inputparameters from commandline:
 - n, size of system
 - problem, which problem to solve. Determines "behavior" given to main.cpp
 - (maybe) max_rho, maximum value of rho-domain
+
 Will also take outputparameters from commandline. How to handle the data.
 - printing
 - plotting
