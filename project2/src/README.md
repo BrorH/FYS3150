@@ -34,3 +34,8 @@ Takes 4 inputparameters:
 - rho_max, systemparameter
 - omega, systemparameter (only for behaviour = 1, 2)
 
+### Compiling
+g++ main.cpp solver.cpp -larmadillo
+### typical inputs for main.cpp
+./a.out 5 1 0 0
+
