@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     Solver problem(n, rho_max, tolerance, d);
     problem.solve();
     mat eigvals = problem.eigenvalues();
-    eigvals.print();
+    sort(eigvals).print();
 
     return 0;
 }
