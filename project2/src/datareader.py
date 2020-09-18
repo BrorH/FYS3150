@@ -9,7 +9,7 @@ class SolvedSystem:
         self.diag = [float(a) for a in self.datablock[1][:-2].split(",")]
         self.eigvals = []
         self.eigvecs = []
-        for line in self.datablock[3:]:
+        for line in self.datablock[2:]:
             splitted = line.split(",")
             self.eigvals.append(float(splitted[0]))
             self.eigvecs.append([float(a) for a in splitted[1:-1]])

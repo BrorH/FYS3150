@@ -119,7 +119,7 @@ void Solver::write(){
     // for(int i = 0; i < n; i++){
     //     datafile << B.diag()[i] << ",";
     // }
-    datafile << endl << "eigvecs: " << endl;
+    datafile << endl;
     for(int i = 0; i < n; i++){
         datafile << B.diag()[i] << ",";
         for (int j =0; j < n; j++){
