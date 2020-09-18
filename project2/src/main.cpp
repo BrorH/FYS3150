@@ -77,9 +77,10 @@ mat diag(int n, double rho_max)
 
     mat d(n, 1, fill::zeros);
 
+    double rho = 0;
     for (int i = 0; i < n; i++)
     {
-        double rho = i * h + h;
+        rho += h;
         d[i] = 2 * pow(h, -2);
         d[i] += pow(omega * rho, 2);
         d[i] += c / rho;
