@@ -14,7 +14,7 @@ private:
 
     mat rho; // (n, 1) matrix with radial domain
     mat A; // (n, n) tridiagonal matrix
-    mat EigVal; // (n, n) diagonal matrix with eigenvalues of A
+    mat B; // (n, n) diagonal matrix with eigenvalues of A
     mat EigVec; // (n, n) Eigenvectormatrix of A
 
     void fillA(int, mat, double);
