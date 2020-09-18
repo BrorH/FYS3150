@@ -8,7 +8,7 @@ Parameters:
         - tolerance of algorithm
     rhomax: float
         - length of system
-    behaviour: int (1, 2, 3)
+    behaviour: int (0, 1, 2)
         - type of problem we solve. (Beam, one electron, two electron)
     omega: float
         - frequency of HO in two electron problem
@@ -56,7 +56,7 @@ mat diag(int n, double rho_max)
         - number of points
     rho_max: float
         - length of system
-    behaviour: (1, 2, 3)
+    behaviour: (0, 1, 2)
         - problem to solve
     omega: float
         - frequency in last problem
@@ -65,11 +65,11 @@ mat diag(int n, double rho_max)
     int behaviour = atoi(garg[4]);
     double omega = 0;
     int c = 0; // numerator in fraction in term for two electron
-    if (behaviour == 2)
+    if (behaviour == 1)
     {
         omega = 1;
     }
-    else if (behaviour == 3)
+    else if (behaviour == 2)
     {
         omega = atof(garg[5]);
         c = 1;
