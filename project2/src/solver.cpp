@@ -71,9 +71,11 @@ void Solver::Jacobi_algorithm()
     double t2;
     double tau;
     double max_Aij;
-
+    int count = 0;
+    
     while (true)
     {
+        count ++;
         max_idx = abs(B - diagmat(B.diag())).index_max(); // Finds linear index of max non-diag element
 
         idxs = ind2sub(size(A), max_idx); // Decomposes linear index
@@ -104,6 +106,7 @@ void Solver::Jacobi_algorithm()
         EigVec *= S;
         B = S.t() * B * S;
     }
+    cout << n << ":  " <<count << endl;
 }
 
 mat Solver::get_A()
