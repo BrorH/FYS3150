@@ -1,67 +1,79 @@
 /*
+
+
+Parameters:
+    n: int
+        - number of points we solve for. N - 1
+    epsilon: float
+        - tolerance of algorithm
+    rhomax: float
+        - length of system
+    behaviour: int (1, 2, 3)
+        - type of problem we solve. (Beam, one electron, two electron)
+    omega: float
+        - frequency of HO in two electron problem
 */
 
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <armadillo>
 #include "solver.h"
 
-using namespace std;
-using namespace arma;
-
-char *garg[5];
+char *garg[6];
 
 mat diag(int, double);
 
-
 int main(int argc, char *argv[])
 {
-    if (argc <= 4) {
+    if (argc <= 4)
+    {
         cout << "Bad usage" << endl;
         exit(1);
     }
     int n = atoi(argv[1]); // read n from commandline
-    double rho_max = atof(argv[2]);
+    double tolerance = pow(10, -atoi(argv[2]));
+    double rho_max = atof(argv[3]);
     for (int i = 0; i < argc; i++)
     {
         garg[i] = argv[i];
     }
-    double tolerance = 1e-8;
 
     mat d = diag(n, rho_max);
     Solver problem(n, rho_max, tolerance, d);
     problem.solve();
     mat eigvals = problem.eigenvalues();
     sort(eigvals).print();
-
     return 0;
 }
 
-mat diag(int n, double rho_max)//, int behaviour = 0, double rho_max = 0, double omega = 0)
+mat diag(int n, double rho_max)
 {
     /*
-    int n, double h, int particles = 0, double rho_max = 0, double omega = 0
     Diagonal of matrix A, for the three cases our solver will be used for.
-    Arguments:
+    Arguments set in commandline:
     -----------
     n: int
-        number of points
-    h: double
-        step length
-    behaviour: int (optional)
-        extra terms in the diagonal of A
-        0: No extra term, for buckling beam problem
-        1: rho^2 term, for single electron in HO
-        2: w^2p^2 + 1/p, for two electron
-    rho_max: double (optional)
-        for use in quantum problems
-    omega: double (optional)
-        for use in two-electron system
+        - number of points
+    rho_max: float
+        - length of system
+    behaviour: (1, 2, 3)
+        - problem to solve
+    omega: float
+        - frequency in last problem
     */
     double h = rho_max / n;
-    int behaviour = atoi(garg[3]);
-    double omega = atof(garg[4]);
+    int behaviour = atoi(garg[4]);
+    double omega = 0;
+    int c = 0; // numerator in fraction in term for two electron
+    if (behaviour == 2)
+    {
+        omega = 1;
+    }
+    else if (behaviour == 3)
+    {
+        omega = atof(garg[5]);
+        c = 1;
+    }
 
     mat d(n, 1, fill::zeros);
 
@@ -69,15 +81,8 @@ mat diag(int n, double rho_max)//, int behaviour = 0, double rho_max = 0, double
     {
         double rho = i * h + h;
         d[i] = 2 * pow(h, -2);
-        if (behaviour == 1)
-        {
-            d[i] += pow(rho, 2);
-        }
-        if (behaviour == 2)
-        {
-            d[i] += pow(omega * rho, 2);
-            d[i] += pow(rho, -1);
-        }
+        d[i] += pow(omega * rho, 2);
+        d[i] += c / rho;
     }
     return d;
 }
