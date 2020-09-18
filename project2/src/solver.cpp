@@ -9,6 +9,8 @@
 using namespace std;
 using namespace arma;
 
+double static pi = 3.1415926538;
+
 Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
 {
     n = _n;
@@ -44,52 +46,63 @@ void Solver::solve()
     Jacobi_algorithm();
 }
 
-mat Solver::Givens(int i, int k, double t)
+mat Solver::Givens(int i, int j, double t)
 {
     mat S(n, n, fill::eye);
     double c = 1 / sqrt(1 + pow(t, 2));
     double s = t * c;
     S(i, i) = c;
-    S(k, k) = c;
-    S(i, k) = s;
-    S(k, i) = -s;
+    S(j, j) = c;
+    S(i, j) = s;
+    S(j, i) = -s;
     return S;
 }
 
 void Solver::Jacobi_algorithm()
 {
-    EigVal = A;
-    EigVec = mat(n,n,fill::eye);
+    B = A;
+    EigVec = mat(n, n, fill::eye);
     mat Eig_prime;
     int max_idx;
     int i;
-    int k;
+    int j;
     uvec idxs;
     double t1;
     double t2;
     double tau;
-    double max_aik;
+    double max_Aij;
 
-    while (true){
-        Eig_prime = EigVal - diagmat(EigVal.diag());
-        max_idx = abs(Eig_prime).index_max();
+    while (true)
+    {
+        max_idx = abs(B - diagmat(B.diag())).index_max(); // Finds linear index of max non-diag element
 
-        idxs = ind2sub(size(A), max_idx);
-        i = idxs(0);
-        k = idxs(1);
+        idxs = ind2sub(size(A), max_idx); // Decomposes linear index
+        i = idxs(0); // Decomposed indecies
+        j = idxs(1);
 
-        max_aik = pow(Eig_prime(i, k), 2);
-        if (max_aik < eps)
-        {
-            break;
-        }
-        tau = (EigVal(i,i) - EigVal(k,k)) / (2 * EigVal(i, k));
-		t1 = -tau + sqrt(1 + pow(tau, 2));
-		t2 = -tau - sqrt(1 + pow(tau, 2));
-        mat S = Givens(i, k, min(t1, t2));
+        max_Aij = pow(B(max_idx), 2); // max non-diag value
+        if (max_Aij < eps) break;
+
+        tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
+        t1 = -tau + sqrt(1 + pow(tau, 2));
+        t2 = -tau - sqrt(1 + pow(tau, 2));
+        // double t = t2;
+        // if (abs(t1) < 1) t = t1;
+        // cout << atan(t1) * 180 / pi << "  " << atan(t2) * 180 / pi << endl;
+        // cout << "sent " << atan(t) * 180 / pi << endl << endl;
+        // double t;
+        // if (tau > 0 ) {
+        //     t = t2;
+        // } else {
+        //     t = t1;
+        // }
+        // cout << tau << endl;
+        // cout << t1 << "   " << t2 << endl;
+        // cout << "sent " << t << endl << endl;
+        mat S = Givens(i, j, min(abs(t1), abs(t2)));
+        // mat S = Givens(i, j, t);
         EigVec *= S;
-        EigVal = S.t() * EigVal * S;
-
+        B = S.t() * B * S;
     }
 }
 
@@ -103,7 +116,7 @@ mat Solver::get_rho()
 }
 mat Solver::eigenvalues()
 {
-    return EigVal.diag();
+    return B.diag();
 }
 mat Solver::eigenvectors()
 {
