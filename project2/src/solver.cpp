@@ -110,24 +110,25 @@ void Solver::Jacobi_algorithm()
 void Solver::write(){
     ofstream datafile;
     datafile.open("data.dat", ios::app);
-    datafile << "n:"<< n << " pmax:" <<pmax << " eps:"<< eps << " counts:"<< counts<< endl;
-    datafile << "d: ";
+    datafile << n << "," <<pmax << ","<< eps << ","<< counts<< endl;
+    //datafile << "diags";
     for(int i = 0; i < n; i++){
         datafile << diags[i] << ",";
     }
-    datafile << endl <<"eigvals: ";
-    for(int i = 0; i < n; i++){
-        datafile << B.diag()[i] << ",";
-    }
+    // datafile << endl <<"eigvals: ";
+    // for(int i = 0; i < n; i++){
+    //     datafile << B.diag()[i] << ",";
+    // }
     datafile << endl << "eigvecs: " << endl;
     for(int i = 0; i < n; i++){
+        datafile << B.diag()[i] << ",";
         for (int j =0; j < n; j++){
             datafile << EigVec(j,i) << ",";
         }
         datafile << endl;
     }
     
-    datafile <<"==================" << endl;
+    datafile <<"*" << endl;
 
 
 
