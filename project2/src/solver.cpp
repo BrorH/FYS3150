@@ -17,7 +17,7 @@ Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
     eps = tolerance;
     pmax = rho_max;
     h = pmax / n;
-
+    diags = diag;
     double non_diag = -pow(h, -2);
     fillA(n, diag, non_diag);
     rho = mat(n, 1);
@@ -71,11 +71,10 @@ void Solver::Jacobi_algorithm()
     double t2;
     double tau;
     double max_Aij;
-    int count = 0;
     
     while (true)
     {
-        count ++;
+        counts ++;
         max_idx = abs(B - diagmat(B.diag())).index_max(); // Finds linear index of max non-diag element
 
         idxs = ind2sub(size(A), max_idx); // Decomposes linear index
@@ -106,7 +105,32 @@ void Solver::Jacobi_algorithm()
         EigVec *= S;
         B = S.t() * B * S;
     }
-    cout << n << ":  " <<count << endl;
+    cout << n << ":  " <<counts << endl;
+}
+void Solver::write(){
+    ofstream datafile;
+    datafile.open("data.dat", ios::app);
+    datafile << "n:"<< n << " pmax:" <<pmax << " eps:"<< eps << " counts:"<< counts<< endl;
+    datafile << "d: ";
+    for(int i = 0; i < n; i++){
+        datafile << diags[i] << ",";
+    }
+    datafile << endl <<"eigvals: ";
+    for(int i = 0; i < n; i++){
+        datafile << B.diag()[i] << ",";
+    }
+    datafile << endl << "eigvecs: " << endl;
+    for(int i = 0; i < n; i++){
+        for (int j =0; j < n; j++){
+            datafile << EigVec(j,i) << ",";
+        }
+        datafile << endl;
+    }
+    
+    datafile <<"==================" << endl;
+
+
+
 }
 
 mat Solver::get_A()

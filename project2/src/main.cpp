@@ -32,8 +32,10 @@ int main(int argc, char *argv[])
     mat d = diag(n, rho_max);
     Solver problem(n, rho_max, tolerance, d);
     problem.solve();
-    mat eigvals = problem.eigenvalues();
-    sort(eigvals).print();
+    problem.write();
+    //mat eigvals = problem.eigenvalues();
+
+    //sort(eigvals).print();
 
     return 0;
 }
