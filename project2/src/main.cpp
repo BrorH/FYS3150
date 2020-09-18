@@ -41,16 +41,11 @@ int main(int argc, char *argv[])
     mat d = diag(n, rho_max);
     Solver problem(n, rho_max, tolerance, d);
     problem.solve();
-<<<<<<< HEAD
     problem.write();
     //mat eigvals = problem.eigenvalues();
 
     //sort(eigvals).print();
 
-=======
-    mat eigvals = problem.eigenvalues();
-    sort(eigvals).print();
->>>>>>> 945b25ee5e3e8ca90612dd1a9831991cd2df2f80
     return 0;
 }
 
