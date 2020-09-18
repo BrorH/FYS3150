@@ -6,8 +6,7 @@ import sys
 import os
 import matplotlib
 from bunch import Bunch
-
-# import
+from datareader import read_data
 
 matplotlib.use(plt.get_backend())
 
@@ -46,10 +45,12 @@ def solve_problem(**kwargs):
     if specs.compile:
         compile(specs.compiled_name)
     print(f"solving. Problem: {specs.behaviour}, n: {specs.n}")
+    open(specs.datafile, "w").close()
     subprocess.run(
         f"./{specs.compiled_name} {specs.n} {specs.tolerance} {specs.rho_max} {specs.behaviour} {specs.omega}".split()
     )
-
+    Solved = read_data(specs.datafile)
+    
 
 # Settings
 specs = Bunch(
@@ -58,6 +59,7 @@ specs = Bunch(
     save=False,
     compile=False,
     compiled_name="main.out",
+    datafile="data.dat",
     n=0,
     tolerance=8,
     behaviour="dummy",
