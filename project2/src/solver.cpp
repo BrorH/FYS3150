@@ -25,6 +25,7 @@ Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
     {
         rho[i] = i * h;
     }
+    armaEigvals = eig_sym(A);
 }
 
 void Solver::fillA(int n, mat d, double a)
@@ -58,10 +59,24 @@ mat Solver::Givens(int i, int j, double t)
     return S;
 }
 
+
+bool Solver::unitTest(){
+    /* First check if eigenvectors still are orthonormal
+    armadillo's function 'accu' sumes over all elements in a matrix */
+    cout << "Orthog? Should be 0: " << accu(V.t()*V)-n <<endl;
+    /* Then checking if V are still eigenvectors */
+    cout << "Eigvecs? Should be 0: "<< accu(armaEigvals-eig_sym(B)) << endl;
+    armaEigvals=eig_sym(B);
+    /* Lastly checking is A is symmetric */
+    cout << "Symm? Should be 0: "<< accu(B-B.t()) << endl;
+    cout << endl;
+    return true;
+}   
+
 void Solver::Jacobi_algorithm()
 {
     B = A;
-    EigVec = mat(n, n, fill::eye);
+    V = mat(n, n, fill::eye);
     mat Eig_prime;
     int max_idx;
     int i;
@@ -83,27 +98,20 @@ void Solver::Jacobi_algorithm()
 
         max_Aij = pow(B(max_idx), 2); // max non-diag value
         if (max_Aij < eps) break;
-
+        
         tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
         t1 = -tau + sqrt(1 + pow(tau, 2));
         t2 = -tau - sqrt(1 + pow(tau, 2));
-        // double t = t2;
-        // if (abs(t1) < 1) t = t1;
-        // cout << atan(t1) * 180 / pi << "  " << atan(t2) * 180 / pi << endl;
-        // cout << "sent " << atan(t) * 180 / pi << endl << endl;
-        // double t;
-        // if (tau > 0 ) {
-        //     t = t2;
-        // } else {
-        //     t = t1;
-        // }
-        // cout << tau << endl;
-        // cout << t1 << "   " << t2 << endl;
-        // cout << "sent " << t << endl << endl;
         mat S = Givens(i, j, min(abs(t1), abs(t2)));
         // mat S = Givens(i, j, t);
-        EigVec *= S;
+        V = S;
         B = S.t() * B * S;
+        if ((counts % 1000) == 0){
+            unitTest();
+            cout << counts << endl;
+        }
+        
+        
     }
     cout << n << ":  " <<counts << endl;
 }
@@ -123,7 +131,7 @@ void Solver::write(){
     for(int i = 0; i < n; i++){
         datafile << B.diag()[i] << ",";
         for (int j =0; j < n; j++){
-            datafile << EigVec(j,i) << ",";
+            datafile << V(j,i) << ",";
         }
         datafile << endl;
     }
@@ -148,5 +156,5 @@ mat Solver::eigenvalues()
 }
 mat Solver::eigenvectors()
 {
-    return EigVec;
+    return V;
 }
