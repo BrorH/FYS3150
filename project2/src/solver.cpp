@@ -21,6 +21,7 @@ Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
     double non_diag = -pow(h, -2);
     fillA(n, diag, non_diag);
     rho = mat(n, 1);
+    I = mat(n, n, fill::eye);
     for (int i = 1; i < n + 1; i++)
     {
         rho[i] = i * h;
@@ -46,16 +47,15 @@ void Solver::solve()
     Jacobi_algorithm();
 }
 
-mat Solver::Givens(int i, int j, double t)
+void Solver::Givens(int i, int j, double t)
 {
-    mat S(n, n, fill::eye);
+    S = I;
     double c = 1 / sqrt(1 + pow(t, 2));
     double s = t * c;
     S(i, i) = c;
     S(j, j) = c;
     S(i, j) = s;
     S(j, i) = -s;
-    return S;
 }
 
 void Solver::Jacobi_algorithm()
@@ -71,7 +71,7 @@ void Solver::Jacobi_algorithm()
     double t2;
     double tau;
     double max_Aij;
-    
+    cout << "Start loop" << endl;
     while (true)
     {
         counts ++;
@@ -87,23 +87,14 @@ void Solver::Jacobi_algorithm()
         tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
         t1 = -tau + sqrt(1 + pow(tau, 2));
         t2 = -tau - sqrt(1 + pow(tau, 2));
-        // double t = t2;
-        // if (abs(t1) < 1) t = t1;
-        // cout << atan(t1) * 180 / pi << "  " << atan(t2) * 180 / pi << endl;
-        // cout << "sent " << atan(t) * 180 / pi << endl << endl;
-        // double t;
-        // if (tau > 0 ) {
-        //     t = t2;
-        // } else {
-        //     t = t1;
-        // }
-        // cout << tau << endl;
-        // cout << t1 << "   " << t2 << endl;
-        // cout << "sent " << t << endl << endl;
-        mat S = Givens(i, j, min(abs(t1), abs(t2)));
-        // mat S = Givens(i, j, t);
+
+        Givens(i, j, min(abs(t1), abs(t2)));
         EigVec *= S;
+        // B.print();
+        // cout << i << "  " << j << endl;
         B = S.t() * B * S;
+        // B.print();
+        // cout << endl << endl;
     }
     cout << n << ":  " <<counts << endl;
 }
@@ -127,7 +118,7 @@ void Solver::write(){
         }
         datafile << endl;
     }
-    
+
     datafile <<"*" << endl;
 
 

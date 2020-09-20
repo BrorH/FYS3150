@@ -19,8 +19,10 @@ private:
     mat B; // (n, n) diagonal matrix with eigenvalues of A
     mat EigVec; // (n, n) Eigenvectormatrix of A
     mat diags;
+    mat I;
+    mat S;
     void fillA(int, mat, double);
-    mat Givens(int, int, double);
+    void Givens(int, int, double);
     void Jacobi_algorithm();
 
 public:
