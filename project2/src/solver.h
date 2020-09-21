@@ -1,14 +1,17 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
+#include <string>
 #include <armadillo>
 using namespace arma;
+using namespace std;
 
 class Solver
 {
 private:
     double pmax; // defaults to 1
     double h;
+    string name;
 
     int counts = 0;
 
@@ -19,14 +22,16 @@ private:
     mat B; // (n, n) diagonal matrix with eigenvalues of A
     mat V; // (n, n) Eigenvectormatrix of A
     mat diags;
+    mat I;
+    mat S;
     void fillA(int, mat, double);
-    mat Givens(int, int, double);
+    void Givens(int, int, double);
     void Jacobi_algorithm();
     bool unitTest();
     vec armaEigvals;
 public:
     int n;
-    Solver(int, double, double, mat); // Constructor
+    Solver(int, double, double, mat, string); // Constructor
     void solve(); // calls Jacobi_algorithm
     void write(); // writes all to data.dat
     mat get_A(); // returns A

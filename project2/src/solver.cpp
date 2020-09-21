@@ -6,13 +6,12 @@
 #include <armadillo>
 #include "solver.h"
 
-using namespace std;
-using namespace arma;
+// using namespace std;
+// using namespace arma;
 
-double static pi = 3.1415926538;
-
-Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
+Solver::Solver(int _n, double rho_max, double tolerance, mat diag, string _name)
 {
+    name = _name;
     n = _n;
     eps = tolerance;
     pmax = rho_max;
@@ -21,6 +20,7 @@ Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
     double non_diag = -pow(h, -2);
     fillA(n, diag, non_diag);
     rho = mat(n, 1);
+    I = mat(n, n, fill::eye);
     for (int i = 1; i < n + 1; i++)
     {
         rho[i] = i * h;
@@ -47,16 +47,15 @@ void Solver::solve()
     Jacobi_algorithm();
 }
 
-mat Solver::Givens(int i, int j, double t)
+void Solver::Givens(int i, int j, double t)
 {
-    mat S(n, n, fill::eye);
+    S = I;
     double c = 1 / sqrt(1 + pow(t, 2));
     double s = t * c;
     S(i, i) = c;
     S(j, j) = c;
     S(i, j) = s;
     S(j, i) = -s;
-    return S;
 }
 
 
@@ -71,7 +70,7 @@ bool Solver::unitTest(){
     cout << "Symm? Should be 0: "<< accu(B-B.t()) << endl;
     cout << endl;
     return true;
-}   
+}
 
 void Solver::Jacobi_algorithm()
 {
@@ -86,7 +85,7 @@ void Solver::Jacobi_algorithm()
     double t2;
     double tau;
     double max_Aij;
-    
+    // cout << "Start loop" << endl;
     while (true)
     {
         counts ++;
@@ -98,26 +97,27 @@ void Solver::Jacobi_algorithm()
 
         max_Aij = pow(B(max_idx), 2); // max non-diag value
         if (max_Aij < eps) break;
-        
+
         tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
         t1 = -tau + sqrt(1 + pow(tau, 2));
         t2 = -tau - sqrt(1 + pow(tau, 2));
-        mat S = Givens(i, j, min(abs(t1), abs(t2)));
+        Givens(i, j, min(abs(t1), abs(t2)));
         // mat S = Givens(i, j, t);
-        V = S;
+        V *= S;
         B = S.t() * B * S;
         if ((counts % 1000) == 0){
             unitTest();
             cout << counts << endl;
         }
-        
-        
+
+
     }
     cout << n << ":  " <<counts << endl;
 }
 void Solver::write(){
     ofstream datafile;
     datafile.open("data.dat", ios::app);
+    datafile << name << endl;
     datafile << n << "," <<pmax << ","<< eps << ","<< counts<< endl;
     //datafile << "diags";
     for(int i = 0; i < n; i++){
@@ -135,7 +135,7 @@ void Solver::write(){
         }
         datafile << endl;
     }
-    
+
     datafile <<"*" << endl;
 
 
