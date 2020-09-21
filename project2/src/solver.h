@@ -1,6 +1,7 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
+#include <string>
 #include <armadillo>
 using namespace arma;
 
@@ -9,6 +10,7 @@ class Solver
 private:
     double pmax; // defaults to 1
     double h;
+    string name;
 
     int counts = 0;
 
@@ -28,7 +30,7 @@ private:
     vec armaEigvals;
 public:
     int n;
-    Solver(int, double, double, mat); // Constructor
+    Solver(int, double, double, mat, string); // Constructor
     void solve(); // calls Jacobi_algorithm
     void write(); // writes all to data.dat
     mat get_A(); // returns A

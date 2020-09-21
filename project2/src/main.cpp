@@ -19,7 +19,7 @@ Parameters:
 #include <fstream>
 #include "solver.h"
 
-char *garg[6];
+char *garg[7];
 
 mat diag(int, double);
 
@@ -30,18 +30,21 @@ int main(int argc, char *argv[])
         cout << "Bad usage" << endl;
         exit(1);
     }
-    int n = atoi(argv[1]); // read n from commandline
-    double tolerance = pow(10, -atoi(argv[2]));
-    double rho_max = atof(argv[3]);
+    string name = argv[1]; // name of the run
+    int n = atoi(argv[2]); // read n from commandline
+    double tolerance = pow(10, -atoi(argv[3]));
+    double rho_max = atof(argv[4]);
     for (int i = 0; i < argc; i++)
     {
         garg[i] = argv[i];
     }
 
     mat d = diag(n, rho_max);
-    Solver problem(n, rho_max, tolerance, d);
+    Solver problem(n, rho_max, tolerance, d, name);
     problem.solve();
     problem.write();
+    problem.eigenvectors().print();
+    // problem.get_A().print();
     //mat eigvals = problem.eigenvalues();
 
     //sort(eigvals).print();
@@ -65,7 +68,7 @@ mat diag(int n, double rho_max)
         - frequency in last problem
     */
     double h = rho_max / n;
-    int behaviour = atoi(garg[4]);
+    int behaviour = atoi(garg[5]);
     double omega = 0;
     int c = 0; // numerator in fraction in term for two electron
     if (behaviour == 1)
@@ -74,7 +77,7 @@ mat diag(int n, double rho_max)
     }
     else if (behaviour == 2)
     {
-        omega = atof(garg[5]);
+        omega = atof(garg[6]);
         c = 1;
     }
 

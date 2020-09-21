@@ -11,8 +11,9 @@ using namespace arma;
 
 double static pi = 3.1415926538;
 
-Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
+Solver::Solver(int _n, double rho_max, double tolerance, mat diag, string _name)
 {
+    name = _name;
     n = _n;
     eps = tolerance;
     pmax = rho_max;
