@@ -17,14 +17,15 @@ private:
     mat rho; // (n, 1) matrix with radial domain
     mat A; // (n, n) tridiagonal matrix
     mat B; // (n, n) diagonal matrix with eigenvalues of A
-    mat EigVec; // (n, n) Eigenvectormatrix of A
+    mat V; // (n, n) Eigenvectormatrix of A
     mat diags;
     mat I;
     mat S;
     void fillA(int, mat, double);
     void Givens(int, int, double);
     void Jacobi_algorithm();
-
+    bool unitTest();
+    vec armaEigvals;
 public:
     int n;
     Solver(int, double, double, mat); // Constructor

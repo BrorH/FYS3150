@@ -26,6 +26,7 @@ Solver::Solver(int _n, double rho_max, double tolerance, mat diag)
     {
         rho[i] = i * h;
     }
+    armaEigvals = eig_sym(A);
 }
 
 void Solver::fillA(int n, mat d, double a)
@@ -58,10 +59,24 @@ void Solver::Givens(int i, int j, double t)
     S(j, i) = -s;
 }
 
+
+bool Solver::unitTest(){
+    /* First check if eigenvectors still are orthonormal
+    armadillo's function 'accu' sumes over all elements in a matrix */
+    cout << "Orthog? Should be 0: " << accu(V.t()*V)-n <<endl;
+    /* Then checking if V are still eigenvectors */
+    cout << "Eigvecs? Should be 0: "<< accu(armaEigvals-eig_sym(B)) << endl;
+    armaEigvals=eig_sym(B);
+    /* Lastly checking is A is symmetric */
+    cout << "Symm? Should be 0: "<< accu(B-B.t()) << endl;
+    cout << endl;
+    return true;
+}
+
 void Solver::Jacobi_algorithm()
 {
     B = A;
-    EigVec = mat(n, n, fill::eye);
+    V = mat(n, n, fill::eye);
     mat Eig_prime;
     int max_idx;
     int i;
@@ -87,14 +102,16 @@ void Solver::Jacobi_algorithm()
         tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
         t1 = -tau + sqrt(1 + pow(tau, 2));
         t2 = -tau - sqrt(1 + pow(tau, 2));
-
-        Givens(i, j, min(abs(t1), abs(t2)));
-        EigVec *= S;
-        // B.print();
-        // cout << i << "  " << j << endl;
+        mat S = Givens(i, j, min(abs(t1), abs(t2)));
+        // mat S = Givens(i, j, t);
+        V = S;
         B = S.t() * B * S;
-        // B.print();
-        // cout << endl << endl;
+        if ((counts % 1000) == 0){
+            unitTest();
+            cout << counts << endl;
+        }
+
+
     }
     cout << n << ":  " <<counts << endl;
 }
@@ -114,7 +131,7 @@ void Solver::write(){
     for(int i = 0; i < n; i++){
         datafile << B.diag()[i] << ",";
         for (int j =0; j < n; j++){
-            datafile << EigVec(j,i) << ",";
+            datafile << V(j,i) << ",";
         }
         datafile << endl;
     }
@@ -139,5 +156,5 @@ mat Solver::eigenvalues()
 }
 mat Solver::eigenvectors()
 {
-    return EigVec;
+    return V;
 }
