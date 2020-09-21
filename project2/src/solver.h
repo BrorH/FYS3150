@@ -4,6 +4,7 @@
 #include <string>
 #include <armadillo>
 using namespace arma;
+using namespace std;
 
 class Solver
 {

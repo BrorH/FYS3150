@@ -6,10 +6,8 @@
 #include <armadillo>
 #include "solver.h"
 
-using namespace std;
-using namespace arma;
-
-double static pi = 3.1415926538;
+// using namespace std;
+// using namespace arma;
 
 Solver::Solver(int _n, double rho_max, double tolerance, mat diag, string _name)
 {
@@ -103,7 +101,7 @@ void Solver::Jacobi_algorithm()
         tau = (B(i, i) - B(j, j)) / (2 * B(i, j));
         t1 = -tau + sqrt(1 + pow(tau, 2));
         t2 = -tau - sqrt(1 + pow(tau, 2));
-        mat S = Givens(i, j, min(abs(t1), abs(t2)));
+        Givens(i, j, min(abs(t1), abs(t2)));
         // mat S = Givens(i, j, t);
         V = S;
         B = S.t() * B * S;
