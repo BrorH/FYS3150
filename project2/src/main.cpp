@@ -41,10 +41,14 @@ int main(int argc, char *argv[])
         garg[i] = argv[i];
     }
     mat d = diag(n, rho_max);
+
+    cout << "Starting run '" << name << "' with n = " << n;
+    cout << ". Solving problem " << argv[5] << endl;
+
     Solver problem(n, rho_max, tolerance, d, name);
     problem.solve();
     problem.write();
-    problem.eigenvectors().print();
+    // problem.eigenvectors().print();
     // problem.get_A().print();
     //mat eigvals = problem.eigenvalues();
 

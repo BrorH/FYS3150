@@ -45,7 +45,6 @@ def plot(kwargs):
     data = read_data("data.dat")[kwargs["name"]]
     min_eigval = np.argmin(data.eigvals)
     min_eigvec = data.eigvecs[:, min_eigval]
-    print(data.eigvecs)
 
     plt.plot(min_eigvec, label="calculated eigenvector")
     plt.plot(a_eigvec, label="Analytical eigenvector")
