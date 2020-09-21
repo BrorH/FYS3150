@@ -23,7 +23,7 @@ def help():
     tolerance:   parameter of the solver. Must be defined. Defaults to 8 (meaning 10^-8)
     plot:        will plot eigenvector corrosponding to the smallest eigenvalue
                  of the solution, together with the analytical eigenvector. Need not be defined
-    delete:      clear data.dat of all previous runs. Need not be defined.
+    clear:      clear data.dat of all previous runs. Need not be defined.
 
     \rExample usage of the file:
     $ python3 master.py q1 20 name=q1_20_test rho_max=3.14 tolerance=5 compile
@@ -56,34 +56,39 @@ def compile():
     subprocess.run("g++ -o main.out main.cpp solver.cpp -Wall -larmadillo -O3".split())
 
 
-def timedate(kwargs):
-    from datetime import datetime
+def named_runs(kwargs):
+    """names runs. If name not given, assigns generic name on form
+        n_problem_datehourminute
+    """
+    if kwargs["name"] is not None:
+        names = [str(n) + kwargs["name"] for n in kwargs["n"]]
+    else:
+        from datetime import datetime
 
-    today = datetime.today()
-    name = "S" + str(kwargs["behav"])
-    name += "_n" + str(kwargs["n"]) + "_"
-    name += today.strftime("%d%H%M")
+        today = datetime.today()
+        name = "_" + str(kwargs["behav"])
+        name += "_" + today.strftime("%d%H%M")
+        names = [str(n) + name for n in kwargs["n"]]
 
-    return name
+    return names
 
 
 def solve(kwargs):
-    if kwargs["delete"]:
+    if kwargs["clear"]:
         open("data.dat", "w").close()
-    subprocess.run(
-        f'./main.out {kwargs["name"]} {kwargs["n"]} {kwargs["tolerance"]} {kwargs["rho_max"]} {kwargs["behav"]} {kwargs["omega"]}'.split()
-    )
-    if kwargs["plot"]:
-        plot(kwargs)
+    for i, n in enumerate(kwargs["n"]):
+        subprocess.run(
+            f'./main.out {kwargs["names"][i]} {n} {kwargs["tolerance"]} {kwargs["rho_max"]} {kwargs["behav"]} {kwargs["omega"]}'.split()
+        )
 
 
-default = lambda kwargs: Bunch(
+default = Bunch(
     rho_max=1,
     omega=0,
     tolerance=8,  # tolerance to achieve before transformations halt
-    name=timedate(kwargs),  # name of the run
+    name=None,
     plot=False,
-    delete=False,
+    clear=False,
     # noshow=False,
     # savefigs=False,
     # pushfigs=False,
@@ -91,18 +96,30 @@ default = lambda kwargs: Bunch(
 
 
 def main(behaviour, n, *args):
+    # def main(behaviour, *args):
     problems = {"beam": 0, "q1": 1, "q2": 2}
     assert behaviour in problems
-    kwargs = {"n": int(n), "behav": problems[behaviour]}
+    try:
+        n = eval(n)
+    except:
+        n = [int(n)]
+    else:
+        assert isinstance(n, (list, tuple))
+    finally:
+        kwargs = {"n": n, "behav": problems[behaviour]}
+
     for arg in args:
         if "=" not in arg:
             kwargs[arg] = True
         else:
             key, val = arg.split("=")
             kwargs[key] = val
-    kwargs = {**default(kwargs), **kwargs}
+    kwargs = {**default, **kwargs}
+    kwargs["names"] = named_runs(kwargs)
 
     solve(kwargs)
+    if kwargs["plot"]:
+        plot(kwargs)
 
 
 if __name__ == "__main__":
@@ -113,8 +130,6 @@ if __name__ == "__main__":
     elif "compile" in args:
         compile()
         args.remove("compile")
-    # elif args[1] == "plot":
-    # plot(args[2:])
 
     if len(args) < 3:
         raise SyntaxError("Insufficent arguments. Use 'help' as argument to see usage")
