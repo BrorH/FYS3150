@@ -1,43 +1,36 @@
 #ifndef SOLVER_H
 #define SOLVER_H
-
+#include <iostream>
+#include <cmath>
 #include <string>
-#include <armadillo>
-using namespace arma;
+#include <fstream>
+
 using namespace std;
 
 class Solver
 {
 private:
-    double pmax; // defaults to 1
-    double h;
-    string name;
+    double **A_init;
 
-    int counts = 0;
+    int maxidx[2];
 
-    double eps; // tolerance, maximum allowed non-diagonal element
-
-    mat rho; // (n, 1) matrix with radial domain
-    mat A; // (n, n) tridiagonal matrix
-    mat B; // (n, n) diagonal matrix with eigenvalues of A
-    mat V; // (n, n) Eigenvectormatrix of A
-    mat diags;
-    mat I;
-    mat S;
-    void fillA(int, mat, double);
-    void Givens(int, int, double);
-    void Jacobi_algorithm();
+    void fillA(double **);
+    void findMaxIdx();
+    void rotateA(double, double);
+    void print(double **);
     bool unitTest();
-    vec armaEigvals;
+    void checkOrthog(double tol);
+    void checkSymmetry(double tol);
+
+
 public:
+    double rho_max, h, eps, *diag, **A, **V; 
     int n;
-    Solver(int, double, double, mat, string); // Constructor
+    int transforms = 0;
+    Solver(int, double, double, double *); // Constructor
     void solve(); // calls Jacobi_algorithm
     void write(); // writes all to data.dat
-    mat get_A(); // returns A
-    mat get_rho(); // returns rho
-    mat eigenvalues(); // returns diagonal of EigVal
-    mat eigenvectors(); // returns EigVec
+       ~Solver();
 };
 
 #endif

@@ -1,100 +1,83 @@
 /*
-
+main.cpp: Setus up the instance and the problem based on passed parameters:
 
 Parameters:
     n: int
-        - number of points we solve for. N - 1
-    epsilon: float
-        - tolerance of algorithm
+        - Number of points we solve for. n = N - 1, where N is the size of our system
+    epsilon: int
+        - Tolerance of jacobi algorithm (in -log10). 
+            i.e epsilon = 8 -> tolerance of 1e-8.
     rhomax: float
-        - length of system
+        - Upper bound on rho variable
     behaviour: int (0, 1, 2)
-        - type of problem we solve. (Beam, one electron, two electron)
+        - Which problem to solve for.
+            0: Buckling beam problem
+            1: Quantum system; one electron
+            2: Quantum system; two electrons
     omega: float
-        - frequency of HO in two electron problem
+        - Frequency of harmonic oscillator in the quantum systems
+           (NB! Should be set to 0 when solving for behaviour 0!)
 */
 
-#include <iostream>
-#include <string>
-#include <fstream>
+
+
 #include "solver.h"
 
-using namespace arma;
 
-char *garg[7];
+int n, method;
+double rho_max, epsilon, omega;
 
-mat diag(int, double);
 
-int main(int argc, char *argv[])
-{
-    if (argc <= 4)
-    {
-        cout << "Bad usage" << endl;
-        exit(1);
-    }
-    string name = argv[1]; // name of the run
-    int n = atoi(argv[2]); // read n from commandline
-    double tolerance = pow(10, -atoi(argv[3]));
-    double rho_max = atof(argv[4]);
-    for (int i = 0; i < argc; i++)
-    {
-        garg[i] = argv[i];
-    }
-    mat d = diag(n, rho_max);
-
-    cout << "Starting run '" << name << "' with n = " << n;
-    cout << ". Solving problem " << argv[5] << endl;
-
-    Solver problem(n, rho_max, tolerance, d, name);
-    problem.solve();
-    problem.write();
-    // problem.eigenvectors().print();
-    // problem.get_A().print();
-    //mat eigvals = problem.eigenvalues();
-
-    //sort(eigvals).print();
-
-    return 0;
-}
-
-mat diag(int n, double rho_max)
+void fill_d(double *d)
 {
     /*
-    Diagonal of matrix A, for the three cases our solver will be used for.
-    Arguments set in commandline:
-    -----------
-    n: int
-        - number of points
-    rho_max: float
-        - length of system
-    behaviour: (0, 1, 2)
-        - problem to solve
-    omega: float
-        - frequency in last problem
+    Fills the diagonal elements of d.
+    In our three cases, only the diagonals differ from case to case.
+    We therefore only have to pass the diagonals to our solver.
     */
-    double h = rho_max / n;
-    int behaviour = atoi(garg[5]);
-    double omega = 0;
-    int c = 0; // numerator in fraction in term for two electron
-    if (behaviour == 1)
-    {
-        omega = 1;
-    }
-    else if (behaviour == 2)
-    {
-        omega = atof(garg[6]);
-        c = 1;
-    }
-
-    mat d(n, 1, fill::zeros);
-
+    double h = rho_max /(double) n;
     double rho = 0;
+
+    int c; // numerator in fraction in term for two electron
+    if (method == 2) c = 1;
+    else c = 0;
+
     for (int i = 0; i < n; i++)
     {
         rho += h;
-        d[i] = 2 * pow(h, -2);
-        d[i] += pow(omega * rho, 2);
-        d[i] += c / rho;
+        d[i] = 2 * pow(h, -2) + pow(omega * rho, 2) + c/rho;
     }
-    return d;
+    
 }
+
+
+
+int main(int argc, char *argv[])
+{
+    if (argc <= 5){
+        cout << "Not correct amount of (proceeding) args. Expected 5, got " << argc<<endl;
+        exit(1);
+    }
+    
+    // read arguments from commandline
+    n = atoi(argv[1]); 
+    epsilon = pow(10, -atoi(argv[2]));
+    rho_max = (double)atof(argv[3]);
+    method = atoi(argv[4]);
+    omega = (double)atof(argv[5]);
+
+    if ((method == 0) && (omega != 0))cout << "method set to 0 but omega is " << omega << ". Should usually be 0. Proceeding." <<endl; 
+    if ((method == 0) && (rho_max != 1))cout << "method set to 0 but rho_max is " << rho_max << ". Should usually be 1. Proceeding." <<endl; 
+    if ((method == 1) && (omega != 1))cout << "method set to 1 but omega is " << omega << ". Should usually be 1. Proceeding." <<endl; 
+    
+    double *d = new double[n]; // array to contain all diagonal elements
+
+    fill_d(d);
+    Solver problem(n, rho_max, epsilon, d); // create problem
+    problem.solve(); // solve problem
+    problem.write(); // write solution
+
+    delete[] d;
+    return 0;
+}
+
