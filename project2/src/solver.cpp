@@ -1,8 +1,9 @@
 #include "solver.h"
 
 
-Solver::Solver(int _n, double _rho_max, double _eps, double *_diag)
+Solver::Solver(int _n, double _rho_max, double _eps, double *_diag, string _name)
 {
+    name = _name;
     n = _n;
     eps = _eps;
     rho_max = _rho_max;
@@ -18,11 +19,13 @@ Solver::Solver(int _n, double _rho_max, double _eps, double *_diag)
     for(int i = 0; i < n; i++){
         V[i][i] = 1; // V is initially identity matrix
     }
-   
+
 }
 Solver::~Solver(){
     // Memory handling
-    delete[] V, A, A_init;
+    delete[] V;
+    delete[] A;
+    delete[] A_init;
 }
 
 void Solver::fillA(double **_A)
@@ -83,7 +86,7 @@ void Solver::findMaxIdx(){
             }
         }
     }
-    
+
 }
 
 void Solver::rotateA(double c, double s){
@@ -93,7 +96,7 @@ void Solver::rotateA(double c, double s){
     */
     int k = maxidx[0]; int l = maxidx[1]; // retrieve indecies from global array
     double A_kk, A_ll, A_ik, A_il, V_ik, V_il; // define variables for the indecies as the changes are static
-    
+
     A_kk = A[k][k]; A_ll = A[l][l];
 
     A[k][k]=A_kk*pow(c,2) - 2*A[k][l]*c*s + A_ll*pow(s,2); // blindly follow Jacobi theory
@@ -139,7 +142,7 @@ void Solver::solve()
         findMaxIdx(); // find max non-idagonal index and update dynamic class array "maxidx"
         k = maxidx[0]; l = maxidx[1]; // retrieve new max indecies
         max_A = pow( A[k][l], 2); // max non-diag value squared
-       
+
         tau = (A[l][l] - A[k][k])/(2*A[k][l]);
 
         if(tau > 0){ // pick the smallest and most fitting theta
@@ -159,17 +162,18 @@ void Solver::solve()
             // ONE MORE!
         }
         transforms ++; // update counter
-        
-        
-        
+
+
+
     }
     cout << n << ":  " <<transforms << endl;
 }
 void Solver::write(){
-    // Simple data-writing system. Raw data not meant to be read by humans. 
-    
+    // Simple data-writing system. Raw data not meant to be read by humans.
+
     ofstream datafile;
     datafile.open("data.dat", ios::app);
+    datafile << name << endl;
     datafile << n << "," <<rho_max << ","<< eps << ","<< transforms<< endl;
     for(int i = 0; i < n; i++){datafile << diag[i] << ",";}
     datafile << endl;
@@ -180,7 +184,7 @@ void Solver::write(){
         }
         datafile << endl;
     }
-    
+
     datafile <<"*" << endl; // separator
 
 

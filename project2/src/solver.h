@@ -11,6 +11,7 @@ class Solver
 {
 private:
     double **A_init;
+    string name;
 
     int maxidx[2];
 
@@ -24,10 +25,10 @@ private:
 
 
 public:
-    double rho_max, h, eps, *diag, **A, **V; 
+    double rho_max, h, eps, *diag, **A, **V;
     int n;
     int transforms = 0;
-    Solver(int, double, double, double *); // Constructor
+    Solver(int, double, double, double *, string); // Constructor
     void solve(); // calls Jacobi_algorithm
     void write(); // writes all to data.dat
        ~Solver();
