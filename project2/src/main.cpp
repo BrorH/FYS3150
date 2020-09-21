@@ -19,6 +19,8 @@ Parameters:
 #include <fstream>
 #include "solver.h"
 
+using namespace arma;
+
 char *garg[7];
 
 mat diag(int, double);
@@ -38,7 +40,6 @@ int main(int argc, char *argv[])
     {
         garg[i] = argv[i];
     }
-
     mat d = diag(n, rho_max);
     Solver problem(n, rho_max, tolerance, d, name);
     problem.solve();
