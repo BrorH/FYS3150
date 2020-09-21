@@ -2,7 +2,7 @@ from subprocess import run
 
 start = "python master.py beam"
 next = [
-    "5 clear",
+    "5 clear compile",
     "50",
     "50 plot=vec",
     "10,20,30,40,50 plot=vec",
@@ -11,7 +11,7 @@ next = [
 ]
 
 description = [
-    "n = 5, emtpy datafile",
+    "n = 5, emtpy datafile, compile solver",
     "n = 50",
     "n = 50, plot smallest eigenvector",
     "n = 10,20,30,40,50, plot smallest eigenvectors for all",
