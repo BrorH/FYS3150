@@ -85,7 +85,7 @@ void Solver::Jacobi_algorithm()
     double t2;
     double tau;
     double max_Aij;
-    cout << "Start loop" << endl;
+    // cout << "Start loop" << endl;
     while (true)
     {
         counts ++;
@@ -103,7 +103,7 @@ void Solver::Jacobi_algorithm()
         t2 = -tau - sqrt(1 + pow(tau, 2));
         Givens(i, j, min(abs(t1), abs(t2)));
         // mat S = Givens(i, j, t);
-        V = S;
+        V *= S;
         B = S.t() * B * S;
         if ((counts % 1000) == 0){
             unitTest();
@@ -117,6 +117,7 @@ void Solver::Jacobi_algorithm()
 void Solver::write(){
     ofstream datafile;
     datafile.open("data.dat", ios::app);
+    datafile << name << endl;
     datafile << n << "," <<pmax << ","<< eps << ","<< counts<< endl;
     //datafile << "diags";
     for(int i = 0; i < n; i++){
