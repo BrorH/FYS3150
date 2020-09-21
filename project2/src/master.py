@@ -4,7 +4,9 @@ import sys
 import time
 from bunch import Bunch
 import subprocess
-from datareader import read_data
+from plotter import Plotter
+
+# from datareader import read_data
 
 
 def help():
@@ -31,25 +33,52 @@ def help():
     print(msg)
 
 
-def plot(kwargs):
-    if kwargs["behav"] == 0:
-        N = kwargs["n"] + 1
-        rhomax = float(kwargs["rho_max"])
-        h = rhomax / N
-        d = 2 / h ** 2
-        a = -1 / h
-        # a_eigval = d + 2 * a * np.cos(np.pi / N)
-        a_eigvec = np.asarray([np.sin(i * np.pi / N) for i in range(1, N)])
-        a_eigvec /= np.linalg.norm(a_eigvec)
+# def plot(kwargs):
+#     do = kwargs["plot"]
+#     if do is False:
+#         return 0
+#     elif do is True:
+#         plot_vec(kwargs)
+#     else:
+#         try:
+#             do = eval(do)
+#         except:
+#             do = [do]
+#         else:
+#             assert isinstance(do, (list, tuple))
+#         finally:
+#             for d in do:
+#                 try:
+#                     eval(f"plot_{d}(kwargs)")
+#                 except:
+#                     print(f"{d} is not valid plotting argument.")
+#                     print("Valid arguments are 'vec', 'count'")
+#                     return 0
 
-    data = read_data("data.dat")[kwargs["name"]]
-    min_eigval = np.argmin(data.eigvals)
-    min_eigvec = data.eigvecs[:, min_eigval]
 
-    plt.plot(min_eigvec, label="calculated eigenvector")
-    plt.plot(a_eigvec, label="Analytical eigenvector")
-    plt.legend()
-    plt.show()
+# def plot_vec(kwargs):
+#     if kwargs["behav"] == 0:
+#         N = kwargs["n"] + 1
+#         rhomax = float(kwargs["rho_max"])
+#         h = rhomax / N
+#         d = 2 / h ** 2
+#         a = -1 / h
+#         # a_eigval = d + 2 * a * np.cos(np.pi / N)
+#         a_eigvec = np.asarray([np.sin(i * np.pi / N) for i in range(1, N)])
+#         a_eigvec /= np.linalg.norm(a_eigvec)
+
+#     data = read_data("data.dat")
+#     for run in kwargs["names"]:
+#         dat = data[run]
+#         val = np.argmin(dat.eigvals)
+#         vec = dat.eigvecs[:, val]
+
+#         rho = np.linspace(0, dat.pmax, dat.n + 1, endpoint=False)[1:]
+#         plt.plot(vec, rho, "k", label=f"n = {dat.n}")
+
+#     plt.plot(a_eigvec, label="Analytical eigenvector")
+#     plt.legend()
+#     plt.show()
 
 
 def compile():
@@ -66,7 +95,7 @@ def named_runs(kwargs):
         from datetime import datetime
 
         today = datetime.today()
-        name = "_" + str(kwargs["behav"])
+        name = "_" + rev_prob[kwargs["behav"]]
         name += "_" + today.strftime("%d%H%M")
         names = [str(n) + name for n in kwargs["n"]]
 
@@ -93,20 +122,18 @@ default = Bunch(
     # savefigs=False,
     # pushfigs=False,
 )
+probs = {"beam": 0, "q1": 1, "q2": 2}
+rev_prob = {v: k for k, v in probs.items()}
 
 
 def main(behaviour, n, *args):
-    # def main(behaviour, *args):
-    problems = {"beam": 0, "q1": 1, "q2": 2}
-    assert behaviour in problems
-    try:
-        n = eval(n)
-    except:
-        n = [int(n)]
+    assert behaviour in probs
+    if ":" in n:
+        a, b, c = n.split(":")
+        n = np.arange(int(a), int(b), int(c))
     else:
-        assert isinstance(n, (list, tuple))
-    finally:
-        kwargs = {"n": n, "behav": problems[behaviour]}
+        n = n.split(",")
+    kwargs = {"n": n, "behav": probs[behaviour]}
 
     for arg in args:
         if "=" not in arg:
@@ -118,8 +145,10 @@ def main(behaviour, n, *args):
     kwargs["names"] = named_runs(kwargs)
 
     solve(kwargs)
-    if kwargs["plot"]:
-        plot(kwargs)
+    # print(kwargs["plot"].split(","))
+    # sys.exit()
+    if kwargs["plot"] is not False:
+        Plotter(kwargs)
 
 
 if __name__ == "__main__":
