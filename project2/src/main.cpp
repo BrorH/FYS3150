@@ -16,7 +16,7 @@ Parameters:
             2: Quantum system; two electrons
     omega: float
         - Frequency of harmonic oscillator in the quantum systems
-           (NB! Should be set to 0 when solving for behaviour 0!)
+           (NB! Should be set to 0 when solving for behaviour 0 and set to 1 when solving behaviour 1)
 */
 
 
@@ -36,7 +36,7 @@ void fill_d(double *d)
     In our three cases, only the diagonals differ from case to case.
     We therefore only have to pass the diagonals to our solver.
     */
-    double h = rho_max /(double) n;
+    double h = rho_max /((double) n+1);
     double rho = 0;
 
     int c; // numerator in fraction in term for two electron
@@ -55,8 +55,8 @@ void fill_d(double *d)
 
 int main(int argc, char *argv[])
 {
-    if (argc <= 6){
-        cout << "Not correct amount of (proceeding) args. Expected 5, got " << argc<<endl;
+    if (argc <= 5){
+        cout << "Not correct amount of (proceeding) args. Expected 5, got " << argc-1<<endl;
         exit(1);
     }
 

@@ -7,7 +7,7 @@ Solver::Solver(int _n, double _rho_max, double _eps, double *_diag, string _name
     n = _n;
     eps = _eps;
     rho_max = _rho_max;
-    h = rho_max / n;
+    h = rho_max / ((double)n +1);
     diag = _diag;
 
     A = new double *[n];
@@ -155,19 +155,13 @@ void Solver::solve()
 
         rotateA(c,s); // perform the unitary transform
 
-        if(transforms%10 == 0){
+        if(transforms%100 == 0){
             // Do unit tests every so often.
             checkOrthog();
             checkSymmetry();
             // ONE MORE!
         }
         transforms ++; // update counter
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> c76fb867268f97cfef8a7fc67af37899242e0776
     }
     //cout << "n: " << n<< " transforms: " <<transforms << endl;
 }
