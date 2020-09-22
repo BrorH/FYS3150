@@ -5,7 +5,7 @@ Parameters:
     n: int
         - Number of points we solve for. n = N - 1, where N is the size of our system
     epsilon: int
-        - Tolerance of jacobi algorithm (in -log10). 
+        - Tolerance of jacobi algorithm (in -log10).
             i.e epsilon = 8 -> tolerance of 1e-8.
     rhomax: float
         - Upper bound on rho variable
@@ -26,6 +26,7 @@ Parameters:
 
 int n, method;
 double rho_max, epsilon, omega;
+string name;
 
 
 void fill_d(double *d)
@@ -47,18 +48,18 @@ void fill_d(double *d)
         rho += h;
         d[i] = 2 * pow(h, -2) + pow(omega * rho, 2) + c/rho;
     }
-    
+
 }
 
 
 
 int main(int argc, char *argv[])
 {
-    if (argc <= 5){
+    if (argc <= 6){
         cout << "Not correct amount of (proceeding) args. Expected 5, got " << argc<<endl;
         exit(1);
     }
-    
+
     // read arguments from commandline
     n = atoi(argv[1]); 
     epsilon = pow(10, -atof(argv[2]));
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
     double *d = new double[n]; // array to contain all diagonal elements
 
     fill_d(d);
-    Solver problem(n, rho_max, epsilon, d); // create problem
+    Solver problem(n, rho_max, epsilon, d, name); // create problem
     problem.solve(); // solve problem
     problem.write(); // write solution
 

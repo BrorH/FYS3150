@@ -4,7 +4,9 @@ import sys
 import time
 from bunch import Bunch
 import subprocess
-from datareader import read_data
+from plotter import Plotter
+
+# from datareader import read_data
 
 
 def help():
@@ -23,7 +25,7 @@ def help():
     tolerance:   parameter of the solver. Must be defined. Defaults to 8 (meaning 10^-8)
     plot:        will plot eigenvector corrosponding to the smallest eigenvalue
                  of the solution, together with the analytical eigenvector. Need not be defined
-    delete:      clear data.dat of all previous runs. Need not be defined.
+    clear:      clear data.dat of all previous runs. Need not be defined.
 
     \rExample usage of the file:
     $ python3 master.py q1 20 name=q1_20_test rho_max=3.14 tolerance=5 compile
@@ -31,78 +33,122 @@ def help():
     print(msg)
 
 
-def plot(kwargs):
-    if kwargs["behav"] == 0:
-        N = kwargs["n"] + 1
-        rhomax = float(kwargs["rho_max"])
-        h = rhomax / N
-        d = 2 / h ** 2
-        a = -1 / h
-        # a_eigval = d + 2 * a * np.cos(np.pi / N)
-        a_eigvec = np.asarray([np.sin(i * np.pi / N) for i in range(1, N)])
-        a_eigvec /= np.linalg.norm(a_eigvec)
+# def plot(kwargs):
+#     do = kwargs["plot"]
+#     if do is False:
+#         return 0
+#     elif do is True:
+#         plot_vec(kwargs)
+#     else:
+#         try:
+#             do = eval(do)
+#         except:
+#             do = [do]
+#         else:
+#             assert isinstance(do, (list, tuple))
+#         finally:
+#             for d in do:
+#                 try:
+#                     eval(f"plot_{d}(kwargs)")
+#                 except:
+#                     print(f"{d} is not valid plotting argument.")
+#                     print("Valid arguments are 'vec', 'count'")
+#                     return 0
 
-    data = read_data("data.dat")[kwargs["name"]]
-    min_eigval = np.argmin(data.eigvals)
-    min_eigvec = data.eigvecs[:, min_eigval]
 
-    plt.plot(min_eigvec, label="calculated eigenvector")
-    plt.plot(a_eigvec, label="Analytical eigenvector")
-    plt.legend()
-    plt.show()
+# def plot_vec(kwargs):
+#     if kwargs["behav"] == 0:
+#         N = kwargs["n"] + 1
+#         rhomax = float(kwargs["rho_max"])
+#         h = rhomax / N
+#         d = 2 / h ** 2
+#         a = -1 / h
+#         # a_eigval = d + 2 * a * np.cos(np.pi / N)
+#         a_eigvec = np.asarray([np.sin(i * np.pi / N) for i in range(1, N)])
+#         a_eigvec /= np.linalg.norm(a_eigvec)
+
+#     data = read_data("data.dat")
+#     for run in kwargs["names"]:
+#         dat = data[run]
+#         val = np.argmin(dat.eigvals)
+#         vec = dat.eigvecs[:, val]
+
+#         rho = np.linspace(0, dat.pmax, dat.n + 1, endpoint=False)[1:]
+#         plt.plot(vec, rho, "k", label=f"n = {dat.n}")
+
+#     plt.plot(a_eigvec, label="Analytical eigenvector")
+#     plt.legend()
+#     plt.show()
 
 
 def compile():
     subprocess.run("g++ -o main.out main.cpp solver.cpp -Wall -larmadillo -O3".split())
 
 
-def timedate(kwargs):
-    from datetime import datetime
+def named_runs(kwargs):
+    """names runs. If name not given, assigns generic name on form
+        n_problem_datehourminute
+    """
+    if kwargs["name"] is not None:
+        names = [str(n) + kwargs["name"] for n in kwargs["n"]]
+    else:
+        from datetime import datetime
 
-    today = datetime.today()
-    name = "S" + str(kwargs["behav"])
-    name += "_n" + str(kwargs["n"]) + "_"
-    name += today.strftime("%d%H%M")
+        today = datetime.today()
+        name = "_" + rev_prob[kwargs["behav"]]
+        name += "_" + today.strftime("%d%H%M")
+        names = [str(n) + name for n in kwargs["n"]]
 
-    return name
+    return names
 
 
 def solve(kwargs):
-    if kwargs["delete"]:
+    if kwargs["clear"]:
         open("data.dat", "w").close()
-    subprocess.run(
-        f'./main.out {kwargs["name"]} {kwargs["n"]} {kwargs["tolerance"]} {kwargs["rho_max"]} {kwargs["behav"]} {kwargs["omega"]}'.split()
-    )
-    if kwargs["plot"]:
-        plot(kwargs)
+    for i, n in enumerate(kwargs["n"]):
+        subprocess.run(
+            f'./main.out {kwargs["names"][i]} {n} {kwargs["tolerance"]} {kwargs["rho_max"]} {kwargs["behav"]} {kwargs["omega"]}'.split()
+        )
 
 
-default = lambda kwargs: Bunch(
+default = Bunch(
     rho_max=1,
     omega=0,
     tolerance=8,  # tolerance to achieve before transformations halt
-    name=timedate(kwargs),  # name of the run
+    name=None,
     plot=False,
-    delete=False,
+    clear=False,
     # noshow=False,
     # savefigs=False,
     # pushfigs=False,
 )
+probs = {"beam": 0, "q1": 1, "q2": 2}
+rev_prob = {v: k for k, v in probs.items()}
 
 
 def main(behaviour, n, *args):
-    problems = {"beam": 0, "q1": 1, "q2": 2}
-    assert behaviour in problems
-    kwargs = {"n": int(n), "behav": problems[behaviour]}
+    assert behaviour in probs
+    if ":" in n:
+        a, b, c = n.split(":")
+        n = np.arange(int(a), int(b), int(c))
+    else:
+        n = n.split(",")
+    kwargs = {"n": n, "behav": probs[behaviour]}
+
     for arg in args:
         if "=" not in arg:
             kwargs[arg] = True
         else:
             key, val = arg.split("=")
             kwargs[key] = val
-    kwargs = {**default(kwargs), **kwargs}
+    kwargs = {**default, **kwargs}
+    kwargs["names"] = named_runs(kwargs)
 
     solve(kwargs)
+    # print(kwargs["plot"].split(","))
+    # sys.exit()
+    if kwargs["plot"] is not False:
+        Plotter(kwargs)
 
 
 if __name__ == "__main__":
@@ -113,8 +159,6 @@ if __name__ == "__main__":
     elif "compile" in args:
         compile()
         args.remove("compile")
-    # elif args[1] == "plot":
-    # plot(args[2:])
 
     if len(args) < 3:
         raise SyntaxError("Insufficent arguments. Use 'help' as argument to see usage")
