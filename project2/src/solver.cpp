@@ -159,11 +159,8 @@ void Solver::solve()
             // ONE MORE!
         }
         transforms ++; // update counter
-        
-        
-        
     }
-    cout << n << ":  " <<transforms << endl;
+    //cout << "n: " << n<< " transforms: " <<transforms << endl;
 }
 void Solver::write(){
     // Simple data-writing system. Raw data not meant to be read by humans. 

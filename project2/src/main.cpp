@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     
     // read arguments from commandline
     n = atoi(argv[1]); 
-    epsilon = pow(10, -atoi(argv[2]));
+    epsilon = pow(10, -atof(argv[2]));
     rho_max = (double)atof(argv[3]);
     method = atoi(argv[4]);
     omega = (double)atof(argv[5]);
