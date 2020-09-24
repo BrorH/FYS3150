@@ -29,27 +29,7 @@ double rho_max, epsilon, omega;
 string name;
 
 
-void fill_d(double *d)
-{
-    /*
-    Fills the diagonal elements of d.
-    In our three cases, only the diagonals differ from case to case.
-    We therefore only have to pass the diagonals to our solver.
-    */
-    double h = rho_max /((double) n+1);
-    double rho = 0;
-
-    int c; // numerator in fraction in term for two electron
-    if (method == 2) c = 1;
-    else c = 0;
-
-    for (int i = 0; i < n; i++)
-    {
-        rho += h;
-        d[i] = 2 * pow(h, -2) + pow(omega * rho, 2) + c/rho;
-    }
-
-}
+void fill_d(double);
 
 
 
@@ -83,3 +63,24 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+void fill_d(double *d)
+{
+    /*
+    Fills the diagonal elements of d.
+    In our three cases, only the diagonals differ from case to case.
+    We therefore only have to pass the diagonals to our solver.
+    */
+    double h = rho_max /((double) n+1);
+    double rho = 0;
+
+    int c; // numerator in fraction in term for two electron
+    if (method == 2) c = 1;
+    else c = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        rho += h;
+        d[i] = 2 * pow(h, -2) + pow(omega * rho, 2) + c/rho;
+    }
+
+}
