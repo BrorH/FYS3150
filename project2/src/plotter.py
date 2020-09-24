@@ -8,7 +8,7 @@ import subprocess
 
 
 matplotlib.use(plt.get_backend())
-font = {"family": "DejaVu Sans", "weight": "bold", "size": 22}
+font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
 plt.rc("font", **font)
 
 
@@ -16,8 +16,9 @@ class Plotter:
     def __init__(self, kwargs):
         self.kwargs = Bunch(kwargs)
         self.data = read_data("data.dat")
-        self.rho = lambda n: np.linspace(0, self.kwargs.rho_max, n + 1, endpoint=False)[1:]
 
+        self.rho = lambda n: np.linspace(0, self.kwargs.rho_max, n + 1, endpoint=False)[1:]
+        self.figs = lambda: plt.subplots(1, 1, dpi=200, frameon=True)
         self.args = ("vec", "vecs", "counts", "error")
 
         todo = self.kwargs.plot
@@ -29,20 +30,22 @@ class Plotter:
             todo = todo.split(",")
             for do in todo:
                 assert do in self.args
-                eval(f"self.plot_{do}()")
+                with plt.style.context("seaborn-darkgrid"):
+                    eval(f"self.plot_{do}()")
 
     def show(self, stump="tmp", xlab="x", ylab="y", size=(16, 11)):
+
         plt.xlabel(xlab)
         plt.ylabel(ylab)
         plt.grid()
-        # plt.legend()
+        plt.legend()
 
         mng = plt.get_current_fig_manager()
         mng.resize(*mng.window.maxsize())
         fig = plt.gcf()
         fig.set_size_inches(size, forward=False)
 
-        name = f"../figures/{stump}.png"
+        name = f"../figures/{stump}.pdf"
         if self.kwargs.savefigs:
             fig.savefig(name)
         if self.kwargs.push:
@@ -53,7 +56,6 @@ class Plotter:
             plt.show()
 
     def plot_vec(self):
-
         colors = plt.cm.viridis(np.linspace(0, 1, len(self.kwargs.names)))
         for i, run in enumerate(self.kwargs.names):
             dat = self.data[run]
@@ -132,10 +134,7 @@ class Plotter:
 
         plt.plot(x, x * a + b, "k--", label=f"fit. a = {a}")
         plt.plot(h, err, "ro", label="max err")
-        plt.xlabel("log10(h)")
-        plt.ylabel("log10(err)")
-        plt.legend()
-        plt.show()
+        self.show(xlab=r"$\log_{10}(h)$", ylab=r"$\log_{10}(\epsilon_{max})$")
 
 
 def pushFile(filename):
