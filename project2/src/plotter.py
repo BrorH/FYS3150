@@ -32,7 +32,8 @@ class Plotter:
         colors = plt.cm.viridis(np.linspace(0, 1, len(self.kwargs.names)))
         for i, run in enumerate(self.kwargs.names):
             dat = self.data[run]
-            idx = np.argmin(dat.eigvals)
+            idx = np.argsort(dat.eigvals)
+            idx = idx[1]
             val = dat.eigvals[idx]
             vec = dat.eigvecs[:, idx]
 
@@ -52,7 +53,7 @@ class Plotter:
         # hh = (N / rho_max) ** 2
         # d = 2 * hh
         # a = -hh
-        # eigval = d + 2 * a * np.cos(np.pi / N)
+        eigval = d + 2 * a * np.cos(np.pi / N)
         eigvec = np.asarray([np.sin(i * np.pi / N) for i in range(1, N)])
         eigvec /= np.linalg.norm(eigvec)
 

@@ -61,16 +61,17 @@ int main(int argc, char *argv[])
     }
 
     // read arguments from commandline
-    n = atoi(argv[1]); 
-    epsilon = pow(10, -atof(argv[2]));
-    rho_max = (double)atof(argv[3]);
-    method = atoi(argv[4]);
-    omega = (double)atof(argv[5]);
+    name = argv[1];
+    n = atoi(argv[2]);
+    epsilon = pow(10, -atof(argv[3]));
+    rho_max = (double)atof(argv[4]);
+    method = atoi(argv[5]);
+    omega = (double)atof(argv[6]);
 
-    if ((method == 0) && (omega != 0))cout << "method set to 0 but omega is " << omega << ". Should usually be 0. Proceeding." <<endl; 
-    if ((method == 0) && (rho_max != 1))cout << "method set to 0 but rho_max is " << rho_max << ". Should usually be 1. Proceeding." <<endl; 
-    if ((method == 1) && (omega != 1))cout << "method set to 1 but omega is " << omega << ". Should usually be 1. Proceeding." <<endl; 
-    
+    if ((method == 0) && (omega != 0))cout << "method set to 0 but omega is " << omega << ". Should usually be 0. Proceeding." <<endl;
+    if ((method == 0) && (rho_max != 1))cout << "method set to 0 but rho_max is " << rho_max << ". Should usually be 1. Proceeding." <<endl;
+    if ((method == 1) && (omega != 1))cout << "method set to 1 but omega is " << omega << ". Should usually be 1. Proceeding." <<endl;
+
     double *d = new double[n]; // array to contain all diagonal elements
 
     fill_d(d);
