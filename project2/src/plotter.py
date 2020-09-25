@@ -1,16 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from datareader import read_data
 from bunch import Bunch
+import os
+import subprocess
+
+
+matplotlib.use(plt.get_backend())
+font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
+plt.rc("font", **font)
 
 
 class Plotter:
     def __init__(self, kwargs):
         self.kwargs = Bunch(kwargs)
         self.data = read_data("data.dat")
-        self.rho = lambda n: np.linspace(0, self.kwargs.rho_max, n + 1, endpoint=False)[1:]
 
-        self.args = ("vec", "vecs", "counts")
+        self.rho = lambda n: np.linspace(0, self.kwargs.rho_max, n + 1, endpoint=False)[1:]
+        self.figs = lambda: plt.subplots(1, 1, dpi=200, frameon=True)
+        self.args = ("vec", "vecs", "counts", "error")
 
         todo = self.kwargs.plot
         if todo is True:
@@ -21,24 +30,43 @@ class Plotter:
             todo = todo.split(",")
             for do in todo:
                 assert do in self.args
-                eval(f"self.plot_{do}()")
+                with plt.style.context("seaborn-darkgrid"):
+                    eval(f"self.plot_{do}()")
 
-    def show(self):
+    def show(self, stump="tmp", xlab="x", ylab="y", size=(16, 11)):
+
+        plt.xlabel(xlab)
+        plt.ylabel(ylab)
+        plt.grid()
         plt.legend()
-        plt.show()
+
+        mng = plt.get_current_fig_manager()
+        mng.resize(*mng.window.maxsize())
+        fig = plt.gcf()
+        fig.set_size_inches(size, forward=False)
+
+        name = f"../figures/{stump}.pdf"
+        if self.kwargs.savefigs:
+            fig.savefig(name)
+        if self.kwargs.push:
+            pushFile(name)
+        if self.kwargs.noshow:
+            plt.clf()
+        else:
+            plt.show()
 
     def plot_vec(self):
-
         colors = plt.cm.viridis(np.linspace(0, 1, len(self.kwargs.names)))
         for i, run in enumerate(self.kwargs.names):
             dat = self.data[run]
-            idx = np.argmin(dat.eigvals)
+            idx = np.argsort(dat.eigvals)
+            idx = idx[0]
             val = dat.eigvals[idx]
             vec = dat.eigvecs[:, idx]
 
             plt.plot(
                 self.rho(dat.n),
-                vec,
+                vec,# * val,
                 color=colors[i],
                 label=fr"n = {dat.n}, $\lambda$ = {val}",
             )
@@ -82,3 +110,35 @@ class Plotter:
         plt.plot(ns, transforms, "ro")
         plt.plot(x, a * x ** 2 + b * x + c, "k--", label=f"2nd degree polynomial fit")
         self.show()
+
+    def plot_error(self):
+        err = []
+        n = []
+        for name in self.kwargs.names:
+            dat = self.data[name]
+            N = dat.n + 1
+            h = dat.pmax / N
+            hh = h ** -2
+            avals = [2 * hh * (1 - np.cos(j * np.pi / N)) for j in range(1, N)]
+
+            val = dat.eigvals
+
+            err.append(max(abs(val - avals) / avals))
+            n.append(h)
+
+        h = np.log10(n)
+        err = np.log10(err)
+
+        x = np.linspace(min(h), max(h), len(h))
+        a, b = np.polyfit(h, err, deg=1)
+
+        plt.plot(x, x * a + b, "k--", label=f"fit. a = {a}")
+        plt.plot(h, err, "ro", label="max err")
+        self.show(xlab=r"$\log_{10}(h)$", ylab=r"$\log_{10}(\epsilon_{max})$")
+
+
+def pushFile(filename):
+    path = os.path.abspath(filename)
+    subprocess.run(f"git add {path}".split())
+    subprocess.run(f'git commit -m "automatic_figure_update" --quiet'.split())
+    subprocess.run(f"git push --quiet".split())

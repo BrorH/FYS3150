@@ -24,6 +24,10 @@ Solver::Solver(int _n, double _rho_max, double _eps, double *_diag, string _name
 Solver::~Solver(){
     // Memory handling
     delete[] V;
+    for (int i = 0; i < n; i++) {
+        delete[] A[i];
+        delete[] A_init[i];
+    }
     delete[] A;
     delete[] A_init;
 }
