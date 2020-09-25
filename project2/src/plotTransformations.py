@@ -8,9 +8,8 @@ from datareader import read_data
 import time
 import matplotlib as mpl
 from scipy import optimize
-N = 40 # rememebr to re-run sim when changing N
+N = 50 # rememebr to re-run sim when changing N
 newsim = False
-
 start = time.time()
 sol = []
 
@@ -24,9 +23,9 @@ if newsim:
     for method in [0, 1, 2]:
         subtime = time.time()
         #for epsilon in np.linspace(8, 16, N):
-        for n in np.linspace(60, 100, N):
+        for n in np.linspace(10, 200, N):
             subprocess.run(f"./main.out {n} {epsilon} {rhomax[method]} {method} {omega[method]}".split())
-            print(f"Method: {method}: {round(100*(n-60)/40, 2)} %")
+            print(f"Method: {method}: {round(100*(n-10)/190, 2)} %")
         print(f"{method} done in {round(time.time() -subtime,3)} s.")
     print(f"All done in {round(time.time() -start,3)} s.")
 
@@ -65,10 +64,10 @@ with plt.style.context("seaborn-darkgrid"):
         #pf = np.polyfit(n, trfs, 1)
         nfit = np.linspace(n[0], n[-1], 1000)
         #print(pf)
-        fitf = lambda t,a,b:  a*t**2+b*t**2*np.log(t)
+        fitf = lambda t,a:  a*t**2#+b*t**2*np.log(t)
         fit = optimize.curve_fit(fitf,  n,  trfs)
-        a,b = tuple(fit[0])
-        ax1.plot(nfit, fitf(nfit, a, b), color=pfcolors[i], linestyle='--', alpha=1,lw=1.5)
+        a = tuple(fit[0])
+        ax1.plot(nfit, fitf(nfit, a), color=pfcolors[i], linestyle='--', alpha=1,lw=1.5)
         ax1.plot(n, trfs,'-o', markersize=1.2, color=colors[i], label=names[i], alpha=0.4, lw=2)
        
     legend = ax1.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon = True)
