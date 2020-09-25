@@ -112,6 +112,9 @@ class Plotter:
         self.show()
 
     def plot_error(self):
+        if self.kwargs.behav != 0:
+            return 0
+            
         err = []
         n = []
         for name in self.kwargs.names:
