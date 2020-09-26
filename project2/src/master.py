@@ -13,20 +13,38 @@ def help():
 
     \rRequired inputs:
     behaviour:   Must be first in input. Determines problem to solve. Either 'beam', 'q1' or 'q2'
-    n:           Must be second in input. Size of matrices.
+    n:           Must be second in input. Size of matrices. Can be single integer,
+                 list split by comma , [NO PARENTHESIS OR SPACE!], or inputs to np.arange(), split by :
+                 Examples:
+                 $ py master.py beam 10
+                                     10,20,30,40
+                                     10:101:10
 
     \rOptional inputs. May require definiton, like 'name=some_name'.
     compile:     recompiles the c++ files. May be put anywhere in commandline input. Does not need to be defined
-    name:        name of the run. Must be defined. Defaults to generic datetime name
+    name:        name of the run. Must be defined. Defaults to generic problem-descriptive name. Not recomended
     rho_max:     parameter of the system. Must be defined. Default to 1
     omega:       parameter of the system. Must be defined. Defaults to 0
     tolerance:   parameter of the solver. Must be defined. Defaults to 8 (meaning 10^-8)
     plot:        will plot eigenvector corrosponding to the smallest eigenvalue
-                 of the solution, together with the analytical eigenvector. Need not be defined
+                 of the solution, together with the analytical eigenvector.
+                 If defined, will plot the defined graphs, if not, will plot all possible
+                 Plottables:  vec:   smallest eigenvector for all runs
+                              vecs:  all eigenvectors for last run
+                              count: plot number of transformations
+                              error: error in eigenvalues, only for 'beam'
     clear:      clear data.dat of all previous runs. Need not be defined.
+    push:       will push saved figs to github
+    savefigs:   will save figures  !!Warning, name of saved figures not unique, will overwrite. Useless atm
+    noshow:     clear figure without showing
 
     \rExample usage of the file:
-    $ python3 master.py q1 20 name=q1_20_test rho_max=3.14 tolerance=5 compile
+    $ python3 master.py q1 20,40,60 name=q1_20_test rho_max=3.14 tolerance=5 compile clear plot=vec,counts
+
+    \nKnown problems:
+    Not expanded to do more problems in one run (only one of beam, q1, q2)
+    Can only plot data from current run. Can easily be expanded to do all data in data.dat
+    One more. Forgot.
     """
     print(msg)
 
