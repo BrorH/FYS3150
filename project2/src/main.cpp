@@ -29,7 +29,7 @@ double rho_max, epsilon, omega;
 string name;
 
 
-void fill_d(double);
+void fill_d(double*);
 
 
 

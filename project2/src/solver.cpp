@@ -159,12 +159,12 @@ void Solver::solve()
 
         rotateA(c,s); // perform the unitary transform
 
-        if(transforms%100 == 0){
-            // Do unit tests every so often.
-            checkOrthog();
-            checkSymmetry();
-            // ONE MORE!
-        }
+        // if(transforms%100 == 0){
+        //     // Do unit tests every so often.
+        //     checkOrthog();
+        //     checkSymmetry();
+        //     // ONE MORE!
+        // }
         transforms ++; // update counter
     }
     //cout << "n: " << n<< " transforms: " <<transforms << endl;
