@@ -28,7 +28,7 @@ def plotTransforms(Ns, ax, sim=False, datafile="data.dat", eps = 12, pmax = [1,1
             # move content to designated file
             subprocess.run(f"cp data.dat {datafile}".split())
     
-    solutions = read_data(datafile)
+    sols = read_data(datafile) #all solutions
     for method in [0,1,2]: # all methods are plotted
         trans = np.array([sols[f"{N}{eps}{pmax[method]}{method}{omega[method]}"].transformations for N in Ns]) # array of counted transformations
         
