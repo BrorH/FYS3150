@@ -81,8 +81,8 @@ void Solver::findMaxIdx(){
     double maxval = 0;
     maxidx[0] = 0; maxidx[1] = 0;
     for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
-            if(i==j) continue;
+        for(int j = i+1; j < n; j++){
+            //if(i==j) continue;
             if (abs(A[i][j]) > maxval){
                 maxidx[0] = i;
                 maxidx[1] = j;

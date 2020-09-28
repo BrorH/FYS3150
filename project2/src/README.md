@@ -39,3 +39,4 @@ g++ main.cpp solver.cpp -larmadillo
 ### typical inputs for main.cpp
 ./a.out 5 1 0 0
 
+PYTHON MODULE COLOUR MUST BE INSTALLED

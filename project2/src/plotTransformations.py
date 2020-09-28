@@ -9,15 +9,15 @@ import time
 import matplotlib as mpl
 from scipy import optimize, stats
 import pandas as pd
-N = 20 # rememebr to re-run sim when changing N
+N = 30 # rememebr to re-run sim when changing N
 newsim = False
 start = time.time()
 sol = []
 
 
-rhomax  = [1, 5, 10]
-omega = [0, 1, 0.1]
-epsilon = 1e-8
+rhomax  = [1, 20, 20]
+omega = [0, 1, 5]
+epsilon = 1e-12
 if newsim:
     print("Solving ...")
     open("data.dat", "w").close() # clear file
@@ -26,8 +26,8 @@ if newsim:
         #for epsilon in np.linspace(8, 16, N):
         for n in np.linspace(100, 450, N):
             subprocess.run(f"./main.out {method}{n} {n} {epsilon} {rhomax[method]} {method} {omega[method]}".split())
-            #print(f"Method: {method}: {round(100*(n-100)/250, 2)} %")
-        #print(f"{method} done in {round(time.time() -subtime,3)} s.")
+            print(f"Method: {method}: {round(100*(n-100)/250, 2)} %")
+        print(f"{method} done in {round(time.time() -subtime,3)} s.")
     print(f"All done in {round(time.time() -start,3)} s.")
 
     #     solutions = read_data()
@@ -50,8 +50,9 @@ for sol_ in [sol1 , sol2, sol3]:
     sol.append([trfs, n, epsilon])
 
 names = [f"Buckling beam", r"Quantum 1, $\rho_{max} = $"+f"{rhomax[1]}" ,r"Quantum 2, $\rho_{max} = $"+f"{rhomax[2]}, $\omega = {omega[2]}$"]
-data = {"Slope":[], "R":[], "err":[]}
+
 with plt.style.context("seaborn-darkgrid"):
+    data = {"Slope":[], "R":[], "err":[]}
     f, ax1 = plt.subplots(1, 1, dpi=200, frameon=True)
     ax1.set_xlabel("Matrix size, $n$")
     ax1.set_ylabel("Transformations, $m$")
@@ -65,7 +66,7 @@ with plt.style.context("seaborn-darkgrid"):
         n = np.array(sol[i][1])#[N*epsnum:N*(epsnum+1)]))
         trfs = np.array(sol[i][0])#[N*epsnum:N*(epsnum+1)]))
         #pf = np.polyfit(n, trfs, 1)
-        n2 = n**2
+        n2 = n**2#*np.log(n)
         nfit = np.linspace(n2[0], n2[-1], 1000)
        
         slope, intercept, r_value, p_value, std_err = stats.linregress(n2,trfs)
@@ -81,6 +82,11 @@ with plt.style.context("seaborn-darkgrid"):
     legend = ax1.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon = True)
     frame = legend.get_frame()
     frame.set_facecolor('white')
+    yupper = 5*n2
+    ylower = 3*n2
+    ax1.fill_between(x=n2, y1=yupper, y2=ylower, color="pink", alpha=0.5)
+
+
 df = pd.DataFrame(data)
 print(
     "\n"
