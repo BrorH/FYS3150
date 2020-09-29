@@ -101,6 +101,6 @@ def main(N, tol):
 
 if __name__ == "__main__":
     compile()
-    n = np.arange(10, 151, 5)
+    n = np.arange(10, 251, 5)
     tolerance = 12
     main(n, tolerance)
