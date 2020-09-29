@@ -32,7 +32,7 @@ def run(args, **kwargs):
     if kwargs["clearfile"]:
         open(f"data/{args['datafile']}","w").close()
     start = time.time()
-    
+
     for argname in ["method", "n", "eps", "rhomax", "omega"]:
         if (not isinstance( args[argname], list)) and (not isinstance( args[argname], np.ndarray)):
             args[argname] = [args[argname]]
@@ -42,9 +42,9 @@ def run(args, **kwargs):
                 for rhomax in args["rhomax"]:
                     for omega in args["omega"]:
                         name = f"{method}.{n}.{eps}.{rhomax}.{omega}"
-                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {args['datafile']}".split())
+                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {method} {omega} {args['datafile']}".split())
                         if kwargs["debug"]:
-                            print(f"n:{n}, eps:{eps}, rhomax:{rhomax}, method:{int(method)}, omega:{omega}")
+                            print(f"n:{n}, eps:{eps}, rhomax:{rhomax}, method:{method}, omega:{omega}")
     print(f"Done in {round(time.time()- start, 3)} s")
 
 
