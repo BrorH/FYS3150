@@ -63,6 +63,8 @@ options:
     -params must follow argHandler formating (see argHandler.py)
 """
 
+font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
+plt.rc("font", **font)
 
 def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], method = [0,1,2], sim=False, datafile="data.dat"):
     # plots num of transformations against N on axis ax, as well as comparing to n**2 and n**2*ln(n)
@@ -101,7 +103,7 @@ def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], met
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}:")
 
 
-def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, 5], method=[0, 1, 2], sim=False, datafile="data.dat"):
+def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 0.5, 1, 5]], method=[0, 1, 2], sim=False, datafile="data.dat"):
     # plots elapsed time of solving against N on axis ax, as well as comparing to n**2 and n**2*ln(n)
     if sim:
         print("Solving ...")
@@ -109,9 +111,14 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, 5], method=[0
         open(f"data/{datafile}", "w+").close() # clear file
         for method_ in method:
             start = time.time()
-            for N in n:
-                subprocess.run(f"./main.out {N}{eps}{rhomax[method_]}{method_}{omega[method_]} {N} {eps} {rhomax[method_]} {method_} {omega[method_]} {datafile}".split())
-                print(f"{round(100*(N-n[0])/(n[-1]-n[0]), 2)} %, N: {N}, eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}")
+            if not isinstance(omega[method_], (list, np.ndarray)):
+                w = [omega[method_]]
+            else:
+                w = omega[method_]
+            for wi in w:
+                for N in n:
+                    subprocess.run(f"./main.out {N}{eps}{rhomax[method_]}{method_}{wi} {N} {eps} {rhomax[method_]} {method_} {wi} {datafile}".split())
+                    print(f"{round(100*(N-n[0])/(n[-1]-n[0]), 2)} %, N: {N}, eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}")
             print(f"Finished in {round(time.time() -start,3)} s.")
         #if datafile != "data.dat":
             # move content to designated file
@@ -119,23 +126,28 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, 5], method=[0
 
     sols = read_data(datafile) #all solutions
     for method_ in method: # all methods are plotted
-        tim = np.array([sols[f"{N}{eps}{rhomax[method_]}{method_}{omega[method_]}"].time for N in n]) # array of counted transformations
+        if "__iter__" not in dir(omega[method_]):
+            w = [omega[method_]]
+        else:
+            w = omega[method_]
+        for i, wi in enumerate(w): # all omegas are plotted
+            tim = np.array([sols[f"{N}{eps}{rhomax[method_]}{method_}{wi}"].time for N in n]) # array of counted transformations
 
-        color = {0:"red", 1:"blue", 2:"green"}[method_] #every method gets unique color
-        label = {0:"Buckling beam", 1:r"Quantum 1, $\rho_{max} = $"+str(rhomax[method_]), 2:r"Quantum 2, $\rho_{max} = $"+f"{rhomax[method_]}, $\omega_r = {omega[method_]}$"}[method_]
+            color = {0:["red"], 1:["blue"], 2:["lime", "mediumseagreen", "seagreen", "darkgreen"]}[method_][i] #every method gets unique color
+            label = {0:"Buckling beam", 1:r"Quantum 1, $\rho_{max} = $"+str(rhomax[method_]), 2:r"Quantum 2, $\rho_{max} = $"+f"{rhomax[method_]}, $\omega_r = {wi}$"}[method_]
 
-        ax.plot(n, tim, "-o", markersize = 2.5, color=color, alpha=0.8, lw=2.8, label=label)
+            ax.plot(n, tim, "-o", markersize=2.5, color=color, alpha=0.8, lw=2.8, label=label)
 
-        plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-        plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
-        legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon = True, fontsize="x-small")
-        frame = legend.get_frame()
-        frame.set_facecolor('white')
-        ax.set_xlabel("Matrix size, $n$")
-        ax.set_ylabel("Time, $s$")
-        plt.title(r"Time")
+            plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+            plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+            legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+            frame = legend.get_frame()
+            frame.set_facecolor('white')
+            ax.set_xlabel("Matrix size, $n$")
+            ax.set_ylabel("Time, $s$")
+            plt.title(r"Time of solving")#, varying $\omega_r$")
 
-        print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}:")
+        print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}:")
 
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
