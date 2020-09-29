@@ -6,45 +6,28 @@ from bunch import Bunch
 import subprocess
 from plotter import Plotter
 
+defaults = {"n":[20], "rhomax":[1], "eps":[12], "omega":[0], "method":[0], "datafile":"data.dat"}
 
 def help():
     msg = """
     \rThis program solves an eigenvalue problem given the following command line inputs
-
-    \rRequired inputs:
-    behaviour:   Must be first in input. Determines problem to solve. Either 'beam', 'q1' or 'q2'
-    n:           Must be second in input. Size of matrices. Can be single integer,
-                 list split by comma , [NO PARENTHESIS OR SPACE!], or inputs to np.arange(), split by :
-                 Examples:
-                 $ py master.py beam 10
-                                     10,20,30,40
-                                     10:101:10
-
-    \rOptional inputs. May require definiton, like 'name=some_name'.
-    compile:     recompiles the c++ files. May be put anywhere in commandline input. Does not need to be defined
-    name:        name of the run. Must be defined. Defaults to generic problem-descriptive name. Not recomended
-    rho_max:     parameter of the system. Must be defined. Default to 1
-    omega:       parameter of the system. Must be defined. Defaults to 0
-    tolerance:   parameter of the solver. Must be defined. Defaults to 8 (meaning 10^-8)
-    plot:        will plot eigenvector corrosponding to the smallest eigenvalue
-                 of the solution, together with the analytical eigenvector.
-                 If defined, will plot the defined graphs, if not, will plot all possible
-                 Plottables:  vec:   smallest eigenvector for all runs
-                              vecs:  all eigenvectors for last run
-                              count: plot number of transformations
-                              error: error in eigenvalues, only for 'beam'
-    clear:      clear data.dat of all previous runs. Need not be defined.
-    push:       will push saved figs to github
-    savefigs:   will save figures  !!Warning, name of saved figures not unique, will overwrite. Useless atm
-    noshow:     clear figure without showing
-
-    \rExample usage of the file:
-    $ python3 master.py q1 20,40,60 name=q1_20_test rho_max=3.14 tolerance=5 compile clear plot=vec,counts
-
-    \nKnown problems:
-    Not expanded to do more problems in one run (only one of beam, q1, q2)
-    Can only plot data from current run. Can easily be expanded to do all data in data.dat
-    One more. Forgot.
+    5 parameters for the system. 
+        -n: matrix size. DEFAUlT: 50
+        -eps: epsilon, tolerance of system in negative log10 (i.e 12 -> 1e-12). DEFAULT: 12
+        -rhomax: upper value of rho. DEFAULT: 1
+        -method: int, 0,1 or 2. 0= buckling, 1 =q1, 2=q1. DEFAULT: 0
+        -omega: omega for q2 system. set to 1 for q1. DEFUALT: 0
+        -datafile: filename in data/ folder to store the datafile. DEFAULT: data.dat
+    ALL of the above arguments (except datafile) can be passed in groups as follows:
+        -single values (i.e n=2), 
+        -as lists (i.e n=2,3,8,100), (NO WS BETWEEN COMMA SEPARATOR)
+        -as ranged lists (i.e n=10:100:2) (NO WS BETWEEN COLON SEPARATOR)
+    
+    some options (passed as standalone arguments):
+        -clear: clears the passed datafile before filling it (even if it is the defaulted one)
+        -compile: compiles the program 
+        -debug: prints debug messages
+        -help: prints this message
     """
     print(msg)
 
@@ -53,86 +36,69 @@ def compile():
     subprocess.run("g++ -o main.out main.cpp solver.cpp -Wall -larmadillo -O3".split())
 
 
-def named_runs(kwargs):
-    """names runs. If name not given, assigns generic name on form
-        n_problem_datehourminute
-    """
-    if kwargs["name"] is not None:
-        names = [str(n) + kwargs["name"] for n in kwargs["n"]]
-    else:
-        from datetime import datetime
+def splitrange(string):
+    # turns a string-formated range, i.e 10:101:10 into a python list list(range(10,101, 10))
+    # can be passed as 10:101 (interval as 1) or 10:101:23 (interval as 23)
+    splitted = string.split(":")
+    if len(splitted) == 2:
+        return splitrange(string+":1")
+    
+    return list(range(int(splitted[0]), int(splitted[1]), int(splitted[2])))
+    
 
-        today = datetime.today()
-        name = "_" + rev_prob[kwargs["behav"]]
-        name += "_" + today.strftime("%d%H%M")
-        names = [str(n) + name for n in kwargs["n"]]
+def splitlist(string):
+    # splits a string of comma separated values into python list
+    return [float(obj) for obj in string.split(",")]
 
-    return names
+def main(*args, **kwargs):
+    #assert behaviour in probs
+    final_args = {}
+    for arg in args[1:]:
+        for argname in defaults.keys():
+            eqIdx = arg.index("=")
+            if arg[:eqIdx] == argname:
+                if "," in arg[eqIdx+1:]:
+                    final_args[argname] = splitlist(arg[eqIdx+1:])
+                elif ":" in arg[eqIdx+1:]:
+                    final_args[argname] = splitrange(arg[eqIdx+1:])
+                else:
+                    final_args[argname] = [arg[eqIdx+1:]]
+    for undefined in list(set(defaults.keys())- set(final_args.keys())):
+        print(f"{undefined} defaulted to {defaults[undefined][0]}")
+        final_args[undefined] = defaults[undefined]
 
-
-def solve(kwargs):
-    if kwargs["clear"]:
-        open("data.dat", "w").close()
-    for i, n in enumerate(kwargs["n"]):
-        subprocess.run(
-            f'./main.out {kwargs["names"][i]} {n} {kwargs["tolerance"]} {kwargs["rho_max"]} {kwargs["behav"]} {kwargs["omega"]}'.split()
-        )
-        print(f"Method: {rev_prob[kwargs['behav']]}: n = {n}: {round(100 * (i + 1) / len(kwargs['n']))} %")
-
-
-default = Bunch(
-    rho_max=1,
-    omega=0,
-    tolerance=8,  # tolerance to achieve before transformations halt
-    name=None,
-    plot=False,
-    clear=False,
-    noshow=False,
-    savefigs=False,
-    push=False,
-)
-probs = {"beam": 0, "q1": 1, "q2": 2}
-rev_prob = {v: k for k, v in probs.items()}
-
-
-def main(behaviour, n, *args):
-    assert behaviour in probs
-    if ":" in n:
-        a, b, c = n.split(":")
-        n = np.arange(int(a), int(b), int(c))
-    else:
-        n = n.split(",")
-    kwargs = {"n": n, "behav": probs[behaviour]}
-
-    for arg in args:
-        if "=" not in arg:
-            kwargs[arg] = True
-        else:
-            key, val = arg.split("=")
-            kwargs[key] = val
-    kwargs = {**default, **kwargs}
-    kwargs["names"] = named_runs(kwargs)
-
-    solve(kwargs)
-    # print(kwargs["plot"].split(","))
-    # sys.exit()
-    if kwargs["plot"] is not False:
-        Plotter(kwargs)
-    # error(kwargs)
+    if kwargs["clearfile"]:
+        open(f"data/{final_args['datafile']}","w").close()
+    start = time.time()
+    for method in final_args["method"]:
+        for n in final_args["n"]:
+            for eps in final_args["eps"]:
+                for rhomax in final_args["rhomax"]:
+                    for omega in final_args["omega"]:
+                        name = f"{method}.{n}.{eps}.{rhomax}.{omega}"
+                        #print(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {final_args['datafile']}")
+                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {final_args['datafile'][0]}".split())
+                        if kwargs["debug"]:
+                            print(f"n:{n}, eps:{eps}, rhomax:{rhomax}, method:{int(method)}, omega:{omega}")
+    print(f"Done in {round(time.time()- start, 3)} s")
 
 
 if __name__ == "__main__":
+    debug = False
+    clearfile = False
+
     args = sys.argv
     if "help" in args:
         help()
         sys.exit()
-    elif "compile" in args:
+    if "compile" in args:
         compile()
         args.remove("compile")
+    if "clear" in args:
+        clearfile = True
+        args.remove("clear")
+    if "debug" in args:
+        debug = True
+        args.remove("debug")
 
-    if len(args) < 3:
-        raise SyntaxError("Insufficent arguments. Use 'help' as argument to see usage")
-    elif len(args) == 3:
-        main(args[1], args[2])
-    else:
-        main(args[1], args[2], *args[3:])
+    main(*args, clearfile=clearfile, debug=debug)
