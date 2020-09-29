@@ -129,6 +129,8 @@ if __name__ == "__main__":
     elif "compile" in args:
         compile()
         args.remove("compile")
+        if len(args) == 1:
+            sys.exit()
 
     if len(args) < 3:
         raise SyntaxError("Insufficent arguments. Use 'help' as argument to see usage")
