@@ -7,7 +7,7 @@ defaults = {"n":20, "rhomax":1, "eps":12, "omega":0, "method":0, "datafile":"dat
 def help():
     msg = """
     \rThis program solves an eigenvalue problem given the following command line inputs
-    5 parameters for the system. 
+    5 parameters for the system.
         -n: matrix size. DEFAUlT: 50
         -eps: epsilon, tolerance of system in negative log10 (i.e 12 -> 1e-12). DEFAULT: 12
         -rhomax: upper value of rho. DEFAULT: 1
@@ -15,13 +15,13 @@ def help():
         -omega: omega for q2 system. set to 1 for q1. DEFUALT: 0
         -datafile: filename in data/ folder to store the datafile. DEFAULT: data.dat
     ALL of the above arguments (except datafile) can be passed in groups as follows:
-        -single values (i.e n=2), 
+        -single values (i.e n=2),
         -as lists (i.e n=2,3,8,100), (NO WS BETWEEN COMMA SEPARATOR)
         -as ranged lists (i.e n=10:100:2) (NO WS BETWEEN COLON SEPARATOR)
-    
+
     some options (passed as standalone arguments):
         -clear: clears the passed datafile before filling it (even if it is the defaulted one)
-        -compile: compiles the program 
+        -compile: compiles the program
         -debug: prints debug messages
         -help: prints this message
     """
