@@ -34,7 +34,7 @@ def mat_sort_by_array(mat, vec, zero=1e-12):
 def read_arma():
     vals = []
     vecs = []
-    with open(arma_file, "r") as file:
+    with open("data/" + arma_file, "r") as file:
         lines = file.readlines()
         n = int(lines[0])
         for i in range(len(lines) - 1):
@@ -78,17 +78,17 @@ def main(N, tol):
     analy_arma_err = []
     for n in N:
         # Find solution using armadillo
-        open(arma_file, "w").close()
+        open("data/" + arma_file, "w").close()
         subprocess.run(f"./{arma_name} {n} {arma_file}".split())
         # sort eigenvectormatrix according to increasing eigenvalue
         arma_vals, arma_vecs = read_arma()
         arma_vecs, arma_vals = mat_sort_by_array(arma_vecs.T, arma_vals)
 
         # Find numerical solution
-        open(Jacobi_file, "w").close()
+        open("data/" + Jacobi_file, "w").close()
         subprocess.run(f"./main.out tmp {n} {tol} 1 0 0 {Jacobi_file}".split())
         # sort eigenvectormatrix according to increasing eigenvalue
-        Jacobi = read_data("data/" + Jacobi_file)["tmp"]
+        Jacobi = read_data(Jacobi_file)["tmp"]
         Jac_vecs, Jac_vals = mat_sort_by_array(Jacobi.eigvecs, Jacobi.eigvals)
 
         analy_vec, analy_val = analytical(n)

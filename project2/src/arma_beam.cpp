@@ -11,7 +11,8 @@ mat fill_A(int);
 int main(int argc, char *argv[])
 {
 	int n = atoi(argv[1]);
-	string name = argv[2];
+	string name = "data/";
+	name += argv[2];
 	mat A = fill_A(n);
 
 	vec eigval;
