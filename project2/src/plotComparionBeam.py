@@ -1,10 +1,18 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import subprocess
 from datareader import read_data
+import sys
+
+
+matplotlib.use(plt.get_backend())
+font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
+plt.rc("font", **font)
 
 arma_name = "comparison.out"  # compiled armadillo c++ file
 arma_file = "comparison.dat"  # datafile for armadillo
+Jacobi_file = "jacobi.dat"  # datafile for jacobi method
 
 
 def mat_sort_by_array(mat, vec, zero=1e-12):
@@ -39,6 +47,7 @@ def read_arma():
 
 def compile():
     subprocess.run(f"g++ -o {arma_name} arma_beam.cpp -larmadillo".split())
+    subprocess.run(f"g++ -o main.out -O3 main.cpp solver.cpp -larmadillo".split())
 
 
 def analytical(n):
@@ -76,10 +85,10 @@ def main(N, tol):
         arma_vecs, arma_vals = mat_sort_by_array(arma_vecs.T, arma_vals)
 
         # Find numerical solution
-        open("data.dat", "w").close()
-        subprocess.run(f"./main.out tmp {n} {tol} 1 0 0".split())
+        open(Jacobi_file, "w").close()
+        subprocess.run(f"./main.out tmp {n} {tol} 1 0 0 {Jacobi_file}".split())
         # sort eigenvectormatrix according to increasing eigenvalue
-        Jacobi = read_data()["tmp"]
+        Jacobi = read_data("data/" + Jacobi_file)["tmp"]
         Jac_vecs, Jac_vals = mat_sort_by_array(Jacobi.eigvecs, Jacobi.eigvals)
 
         analy_vec, analy_val = analytical(n)
@@ -90,17 +99,42 @@ def main(N, tol):
         analy_arma_err.append(error(analy_vec, arma_vecs))
 
     with plt.style.context("seaborn-darkgrid"):
-        plt.plot(N, arma_Jac_err, "o", color="firebrick", label=r"$\delta_{rel}$ armadillo-Jacobi")
-        plt.plot(N, analy_Jac_err, "o", color="forestgreen", label=r"$\delta_{rel}$ analytical-Jacobi")
-        plt.plot(N, analy_arma_err, "o", color="mediumblue", label=r"$\delta_{rel}$ analytical-armadillo")
+        plt.plot(
+            N,
+            arma_Jac_err,
+            "o",
+            color="firebrick",
+            label=r"$\delta_{rel}$ armadillo-Jacobi",
+        )
+        plt.plot(
+            N,
+            analy_Jac_err,
+            "o",
+            color="forestgreen",
+            label=r"$\delta_{rel}$ analytical-Jacobi",
+        )
+        plt.plot(
+            N,
+            analy_arma_err,
+            "o",
+            color="mediumblue",
+            label=r"$\delta_{rel}$ analytical-armadillo",
+        )
+
+        mng = plt.get_current_fig_manager()
+        mng.resize(*mng.window.maxsize())
+        fig = plt.gcf()
+        fig.set_size_inches((16, 11), forward=False)
 
         plt.xlabel("n")
         plt.ylabel("relative difference")
         plt.legend()
         plt.show()
 
+
 if __name__ == "__main__":
-    compile()
+    if "compile" in sys.argv:
+        compile()
     n = np.arange(10, 251, 5)
     tolerance = 12
     main(n, tolerance)
