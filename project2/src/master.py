@@ -1,12 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import sys
-import time
-from bunch import Bunch
-import subprocess
-from plotter import Plotter
+from argHandler import argHandler
+import sys, time, subprocess
 
-defaults = {"n":[20], "rhomax":[1], "eps":[12], "omega":[0], "method":[0], "datafile":"data.dat"}
+defaults = {"n":20, "rhomax":1, "eps":12, "omega":0, "method":0, "datafile":"data.dat"}
 
 def help():
     msg = """
@@ -32,73 +28,42 @@ def help():
     print(msg)
 
 
-def compile():
-    subprocess.run("g++ -o main.out main.cpp solver.cpp -Wall -larmadillo -O3".split())
-
-
-def splitrange(string):
-    # turns a string-formated range, i.e 10:101:10 into a python list list(range(10,101, 10))
-    # can be passed as 10:101 (interval as 1) or 10:101:23 (interval as 23)
-    splitted = string.split(":")
-    if len(splitted) == 2:
-        return splitrange(string+":1")
-    
-    return list(range(int(splitted[0]), int(splitted[1]), int(splitted[2])))
-    
-
-def splitlist(string):
-    # splits a string of comma separated values into python list
-    return [float(obj) for obj in string.split(",")]
-
-def main(*args, **kwargs):
-    #assert behaviour in probs
-    final_args = {}
-    for arg in args[1:]:
-        for argname in defaults.keys():
-            eqIdx = arg.index("=")
-            if arg[:eqIdx] == argname:
-                if "," in arg[eqIdx+1:]:
-                    final_args[argname] = splitlist(arg[eqIdx+1:])
-                elif ":" in arg[eqIdx+1:]:
-                    final_args[argname] = splitrange(arg[eqIdx+1:])
-                else:
-                    final_args[argname] = [arg[eqIdx+1:]]
-    for undefined in list(set(defaults.keys())- set(final_args.keys())):
-        print(f"{undefined} defaulted to {defaults[undefined][0]}")
-        final_args[undefined] = defaults[undefined]
-
+def main(args, **kwargs):
     if kwargs["clearfile"]:
-        open(f"data/{final_args['datafile']}","w").close()
+        open(f"data/{args['datafile'][0]}","w").close()
     start = time.time()
-    for method in final_args["method"]:
-        for n in final_args["n"]:
-            for eps in final_args["eps"]:
-                for rhomax in final_args["rhomax"]:
-                    for omega in final_args["omega"]:
+    for method in args["method"]:
+        for n in args["n"]:
+            for eps in args["eps"]:
+                for rhomax in args["rhomax"]:
+                    for omega in args["omega"]:
                         name = f"{method}.{n}.{eps}.{rhomax}.{omega}"
-                        #print(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {final_args['datafile']}")
-                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {final_args['datafile'][0]}".split())
+                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {args['datafile'][0]}".split())
                         if kwargs["debug"]:
                             print(f"n:{n}, eps:{eps}, rhomax:{rhomax}, method:{int(method)}, omega:{omega}")
     print(f"Done in {round(time.time()- start, 3)} s")
 
 
 if __name__ == "__main__":
+    args = sys.argv
+
     debug = False
     clearfile = False
-
-    args = sys.argv
     if "help" in args:
         help()
         sys.exit()
     if "compile" in args:
-        compile()
+        print("Compiling")
+        subprocess.run("g++ -o main.out main.cpp solver.cpp -Wall -larmadillo -O3".split())
         args.remove("compile")
     if "clear" in args:
         clearfile = True
+        print("Clearing file")
         args.remove("clear")
     if "debug" in args:
         debug = True
         args.remove("debug")
 
-    main(*args, clearfile=clearfile, debug=debug)
+    args = argHandler(defaults).parse(args)
+
+    main(args, clearfile=clearfile, debug=debug)

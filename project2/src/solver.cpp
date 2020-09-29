@@ -169,11 +169,11 @@ void Solver::solve()
     }
     //cout << "n: " << n<< " transforms: " <<transforms << endl;
 }
-void Solver::write(){
+void Solver::write(string filename){
     // Simple data-writing system. Raw data not meant to be read by humans.
 
     ofstream datafile;
-    datafile.open("data.dat", ios::app);
+    datafile.open("data/"+filename, ios::app);
     datafile << name << endl;
     datafile << n << "," <<rho_max << ","<< eps << ","<< transforms<< endl;
     for(int i = 0; i < n; i++){datafile << diag[i] << ",";}

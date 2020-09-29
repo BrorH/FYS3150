@@ -30,7 +30,7 @@ public:
     int transforms = 0;
     Solver(int, double, double, double *, string); // Constructor
     void solve(); // calls Jacobi_algorithm
-    void write(); // writes all to data.dat
+    void write(string filename); // writes all to data.dat
        ~Solver();
 };
 
