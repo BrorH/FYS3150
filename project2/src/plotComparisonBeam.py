@@ -36,13 +36,13 @@ def read_arma():
     vecs = []
     with open("data/" + arma_file, "r") as file:
         lines = file.readlines()
-        n = int(lines[0])
+        n, time = lines[0].split(",")
         for i in range(len(lines) - 1):
             V = [float(v) for v in lines[i + 1].split(",")]
             vals.append(V[0])
             vecs.append(V[1:])
 
-    return np.asarray(vals), np.asarray(vecs)
+    return np.asarray(vals), np.asarray(vecs), time
 
 
 def compile():
@@ -76,13 +76,17 @@ def main(N, tol):
     arma_Jac_err = []
     analy_Jac_err = []
     analy_arma_err = []
+    time_arma = []
+    time_Jac = []
     for n in N:
+        print("n = ")
         # Find solution using armadillo
         open("data/" + arma_file, "w").close()
         subprocess.run(f"./{arma_name} {n} {arma_file}".split())
         # sort eigenvectormatrix according to increasing eigenvalue
-        arma_vals, arma_vecs = read_arma()
+        arma_vals, arma_vecs, time = read_arma()
         arma_vecs, arma_vals = mat_sort_by_array(arma_vecs.T, arma_vals)
+        time_arma.append(time)
 
         # Find numerical solution
         open("data/" + Jacobi_file, "w").close()
@@ -90,6 +94,7 @@ def main(N, tol):
         # sort eigenvectormatrix according to increasing eigenvalue
         Jacobi = read_data(Jacobi_file)["tmp"]
         Jac_vecs, Jac_vals = mat_sort_by_array(Jacobi.eigvecs, Jacobi.eigvals)
+        time_Jac.append(Jacobi.time)
 
         analy_vec, analy_val = analytical(n)
 
@@ -126,10 +131,26 @@ def main(N, tol):
         fig = plt.gcf()
         fig.set_size_inches((16, 11), forward=False)
 
-        plt.xlabel("n")
+        plt.title("total relative difference between each method")
+        plt.xlabel("N")
         plt.ylabel("relative difference")
         plt.legend()
         plt.show()
+
+    with plt.style.context("seaborn-darkgrid"):
+        plt.plot(N, time_arma, "o", color="firebrick", label="armadillo")
+        plt.plot(N, time_Jac, "o", color="forestgreen", label="Jacobi method")
+        plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+        legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+        frame = legend.get_frame()
+        frame.set_facecolor('white')
+        plt.title("Time for solving")
+        plt.xlabel("N")
+        plt.ylabel("Time, [s]")
+        plt.legend()
+        plt.show()
+
 
 
 if __name__ == "__main__":
