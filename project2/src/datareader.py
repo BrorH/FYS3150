@@ -10,7 +10,7 @@ class SolvedSystem:
 
     def parse(self):
         self.name = self.datablock[0].strip()
-        n, self.pmax, self.eps, self.transformations = tuple(
+        n, self.pmax, self.eps, self.transformations, self.time = tuple(
             [float(a) for a in self.datablock[1].split(",")]
         )
         self.n = int(n)

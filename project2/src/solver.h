@@ -4,6 +4,7 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include "time.h"
 
 using namespace std;
 
@@ -11,6 +12,7 @@ class Solver
 {
 private:
     double **A_init;
+    double time;
     string name;
 
     int maxidx[2];
