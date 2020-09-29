@@ -25,7 +25,7 @@ class SolvedSystem:
 
 
 def read_data(filename="data.dat"):
-    with open(filename) as file:
+    with open(f"data/{filename}") as file:
         lines = file.readlines()
     instances = {}
     blocks = []

@@ -35,11 +35,7 @@ void fill_d(double*);
 
 int main(int argc, char *argv[])
 {
-    // if (argc <= 5){
-    //     cout << "Not correct amount of (proceeding) args. Expected 5, got " << argc-1<<endl;
-    //     exit(1);
-    // }
-
+   
     // read arguments from commandline
     name = argv[1];
     n = atoi(argv[2]);
@@ -48,11 +44,7 @@ int main(int argc, char *argv[])
     method = atoi(argv[5]);
     omega = (double)atof(argv[6]);
     datafile = argv[7];
-
-    // if ((method == 0) && (omega != 0))cout << "method set to 0 but omega is " << omega << ". Should usually be 0. Proceeding." <<endl;
-    // if ((method == 0) && (rho_max != 1))cout << "method set to 0 but rho_max is " << rho_max << ". Should usually be 1. Proceeding." <<endl;
-    // if ((method == 1) && (omega != 1))cout << "method set to 1 but omega is " << omega << ". Should usually be 1. Proceeding." <<endl;
-
+   
     double *d = new double[n]; // array to contain all diagonal elements
 
     fill_d(d);

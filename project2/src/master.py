@@ -28,20 +28,25 @@ def help():
     print(msg)
 
 
-def main(args, **kwargs):
+def run(args, **kwargs):
     if kwargs["clearfile"]:
-        open(f"data/{args['datafile'][0]}","w").close()
+        open(f"data/{args['datafile']}","w").close()
     start = time.time()
+    
+    for argname in ["method", "n", "eps", "rhomax", "omega"]:
+        if (not isinstance( args[argname], list)) and (not isinstance( args[argname], np.ndarray)):
+            args[argname] = [args[argname]]
     for method in args["method"]:
         for n in args["n"]:
             for eps in args["eps"]:
                 for rhomax in args["rhomax"]:
                     for omega in args["omega"]:
                         name = f"{method}.{n}.{eps}.{rhomax}.{omega}"
-                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {args['datafile'][0]}".split())
+                        subprocess.run(f"./main.out {name} {n} {eps} {rhomax} {int(method)} {omega} {args['datafile']}".split())
                         if kwargs["debug"]:
                             print(f"n:{n}, eps:{eps}, rhomax:{rhomax}, method:{int(method)}, omega:{omega}")
     print(f"Done in {round(time.time()- start, 3)} s")
+
 
 
 if __name__ == "__main__":
@@ -66,4 +71,4 @@ if __name__ == "__main__":
 
     args = argHandler(defaults).parse(args)
 
-    main(args, clearfile=clearfile, debug=debug)
+    run(args, clearfile=clearfile, debug=debug)
