@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <armadillo>
+#include "time.h"
 
 using namespace std;
 using namespace arma;
@@ -18,11 +19,13 @@ int main(int argc, char *argv[])
 	vec eigval;
 	mat eigvec;
 
+	clock_t start = clock();
 	eig_sym(eigval, eigvec, A);
+	double time = ((clock() - start)/(double)CLOCKS_PER_SEC);
 
 	ofstream datafile;
 	datafile.open(name, ios::app);
-	datafile << n << endl;
+	datafile << n << "," << time << endl;
 	for (int i = 0; i < n; i++)
 	{
 		datafile << eigval[i];
