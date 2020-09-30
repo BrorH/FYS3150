@@ -219,7 +219,7 @@ def analytical_comparison(n=np.arange(20, 151, 10), eps=12, rhomax=[1,5,5], omeg
             V0 = 3/2 * (omega_r / 2) ** (2 / 3)
             we = np.sqrt(3) * omega_r
 
-            vals = [V0 + we * (m + 0.5) for m in range(n)]
+            vals = [V0 + we * (m + 0.5) for m in range(1,n+1)]
             vec = (we / np.pi) ** (1/4) * np.exp(-we / 2 * (r - r0) ** 2)
             return vals, vec
 
@@ -426,7 +426,7 @@ def eigvalsSingleElectron(n = 100, rhomax = np.linspace(4,6, 100), eps = 16, ome
     ax.set_title(f"Eigenvalues for {static}")
 
 
-def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
+def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=4.827, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
     if sim:
         open(f"data/{datafile}", "w+").close()
         for n_ in n:
@@ -449,7 +449,7 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 1
     popt, pcov = optimize.curve_fit(f, n[fitIdxStart:], vals[fitIdxStart:])
 
     x = np.linspace(n[fitIdxStart], 4000, 1000)
-    ax.plot(x,f(x,*popt), color="blue", lw=2, alpha=0.5, label=f"Fit ${round(popt[0],2)}\log"+r"_{10}"+f"(n){round(popt[1],3)}$")
+    #ax.plot(x,f(x,*popt), color="blue", lw=2, alpha=0.5, label=f"Fit ${round(popt[0],2)}\log"+r"_{10}"+f"(n){round(popt[1],3)}$")
 
 
     ax.set_xlabel("Matrix size, n")
@@ -457,6 +457,8 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 1
     legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=0.4, frameon = True,loc='lower right')
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
+
+
 
 
 if __name__ == "__main__":
