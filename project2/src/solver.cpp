@@ -137,6 +137,7 @@ void Solver::solve()
     */
     int k, l;
     double t, c, s, tau, max_A;
+    clock_t start = clock();
 
     transforms = 0;
     max_A = 2*eps; // Set a higher start value
@@ -159,14 +160,16 @@ void Solver::solve()
 
         rotateA(c,s); // perform the unitary transform
 
-        // if(transforms%100 == 0){
-        //     // Do unit tests every so often.
-        //     checkOrthog();
-        //     checkSymmetry();
-        //     // ONE MORE!
-        // }
+        if(transforms%100 == 0){
+            // Do unit tests every so often.
+            checkOrthog();
+            checkSymmetry();
+            // ONE MORE!
+        }
         transforms ++; // update counter
     }
+    clock_t end = clock();
+    time = ((end - start) / (double)CLOCKS_PER_SEC);
     //cout << "n: " << n<< " transforms: " <<transforms << endl;
 }
 void Solver::write(string filename){
@@ -175,7 +178,7 @@ void Solver::write(string filename){
     ofstream datafile;
     datafile.open("data/"+filename, ios::app);
     datafile << name << endl;
-    datafile << n << "," <<rho_max << ","<< eps << ","<< transforms<< endl;
+    datafile << n << "," <<rho_max << ","<< eps << ","<< transforms << "," << time << endl;
     for(int i = 0; i < n; i++){datafile << diag[i] << ",";}
     datafile << endl;
     for(int i = 0; i < n; i++){
