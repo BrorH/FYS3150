@@ -235,7 +235,7 @@ def error(n=[40, 80], rhomax=[1,10,20], eps=12, omega=[0,1,5], method=[0], sim=F
             vals = data.eigvals
             vecs = data.eigvecs
             vecs, vals = mat_sort_by_array(vecs, vals)
-            avals, avecs = analytical_beam(_n, method_)
+            avals, avecs = analytical_beam(_n)
 
             err_vals = np.log10(abs(np.sum(abs(vals - avals) / avals)) / _n)
             err_vecs = np.log10(abs(np.sum(abs(vecs - avecs) / avecs)) / _n / _n)
@@ -353,7 +353,7 @@ def eigvalsSingleElectron(n = 100, rhomax = np.linspace(4,6, 100), eps = 16, ome
     ax.set_title(f"Eigenvalues for {static}")
 
 
-def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
+def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=4.827, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
     if sim:
         open(f"data/{datafile}", "w+").close()
         for n_ in n:
@@ -376,7 +376,7 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 1
     popt, pcov = optimize.curve_fit(f, n[fitIdxStart:], vals[fitIdxStart:])
 
     x = np.linspace(n[fitIdxStart], 4000, 1000)
-    ax.plot(x,f(x,*popt), color="blue", lw=2, alpha=0.5, label=f"Fit ${round(popt[0],2)}\log"+r"_{10}"+f"(n){round(popt[1],3)}$")
+    #ax.plot(x,f(x,*popt), color="blue", lw=2, alpha=0.5, label=f"Fit ${round(popt[0],2)}\log"+r"_{10}"+f"(n){round(popt[1],3)}$")
 
 
     ax.set_xlabel("Matrix size, n")
@@ -413,6 +413,8 @@ def wavefunctionTwoElectron(n=100, method=[1,2], eps=12, rho_max=4.827, omega=[0
             for i in range(1):
                 print(np.linalg.norm(vecs[:, i]))
                 plt.plot(rho, vecs[:, i] ** 2)
+
+
 
 
 
