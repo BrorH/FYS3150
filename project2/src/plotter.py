@@ -154,21 +154,23 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 5]], m
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}:")
 
 
-def time_armadillo(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data.dat"):
+def time_armadillo(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data2.dat"):
 
     arma = []
     jacobi = []
     print("Solving ...")
     start = time.time()
+    
     for _n in n:
-        open(f"data/{datafile}", "w").close() # clear file
-        subprocess.run(f"./arma.out {n} {datafile}".split())
-        _, _, t = read_arma(datafile)
-        arma.append(t)
+        # open(f"data/{datafile}", "w").close() # clear file
+        # subprocess.run(f"./arma.out {n} {datafile}".split())
+        # _, _, t = read_arma(datafile)
+        # arma.append(t)
 
-        open(f"data/{datafile}", "w").close() # clear file1
-        subprocess.run(f"./main.out {n}{eps}{rho_max}{method}{omega} {n} {eps} {rho_max} {method} {omega} {datafile}".split())
-        t = read_data(datafile).time
+        #open(f"data/{datafile}", "w").close() # clear file1
+        subprocess.run(f"./main.out {_n}{eps}{rho_max}{method}{omega} {_n} {eps} {rho_max} {method} {omega} {datafile}".split())
+        t = read_data(datafile)
+        print(t)
         jacobi.append(t)
 
         print(f"ρ: {round(_n,3)}/{n[-1]}, {round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %")
@@ -279,7 +281,7 @@ def eigvalsSingleElectron(n = 100, rhomax = np.linspace(4,6, 100), eps = 16, ome
     ax.set_title(f"Eigenvalues for {static}")
 
 
-def eigvalAccuracySingleElectron(n = list(range(10, 350)), rhomax=20, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
+def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 12, method=1, fitIdxStart = 10, sim = False, datafile="data.dat"):
     if sim:
         open(f"data/{datafile}", "w+").close()
         for n_ in n:
@@ -310,8 +312,6 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350)), rhomax=20, eps = 12, 
     legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=0.4, frameon = True,loc='lower right')
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
-
-
 
 
 
