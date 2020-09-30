@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
 	name += argv[2];
 	mat A = fill_A(n);
 
-	vec eigval;
-	mat eigvec;
+	cx_vec eigval;
+	cx_mat eigvec;
 
 	clock_t start = clock();
-	eig_sym(eigval, eigvec, A);
+	eig_gen(eigval, eigvec, A);
 	double time = ((clock() - start)/(double)CLOCKS_PER_SEC);
 
 	ofstream datafile;
@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
 	datafile << n << "," << time << endl;
 	for (int i = 0; i < n; i++)
 	{
-		datafile << eigval[i];
+		datafile << real(eigval[i]);
 		for (int j = 0; j < n; j++)
 		{
-			datafile << "," << eigvec(j, i);
+			datafile << "," << real(eigvec(j, i));
 		}
 		datafile << endl;
 	}
