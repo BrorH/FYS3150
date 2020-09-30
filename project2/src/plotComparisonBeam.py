@@ -42,7 +42,7 @@ def read_arma():
             vals.append(V[0])
             vecs.append(V[1:])
 
-    return np.asarray(vals), np.asarray(vecs), time
+    return np.asarray(vals), np.asarray(vecs), float(time)
 
 
 def compile():
@@ -79,7 +79,7 @@ def main(N, tol):
     time_arma = []
     time_Jac = []
     for n in N:
-        print("n = ")
+        print("n = ", n)
         # Find solution using armadillo
         open("data/" + arma_file, "w").close()
         subprocess.run(f"./{arma_name} {n} {arma_file}".split())
@@ -104,21 +104,22 @@ def main(N, tol):
         analy_arma_err.append(error(analy_vec, arma_vecs))
 
     with plt.style.context("seaborn-darkgrid"):
-        plt.plot(
+        f, ax = plt.subplots(1,1, dpi=100,frameon=True)
+        ax.plot(
             N,
             arma_Jac_err,
             "o",
             color="firebrick",
             label=r"$\delta_{rel}$ armadillo-Jacobi",
         )
-        plt.plot(
+        ax.plot(
             N,
             analy_Jac_err,
             "o",
             color="forestgreen",
             label=r"$\delta_{rel}$ analytical-Jacobi",
         )
-        plt.plot(
+        ax.plot(
             N,
             analy_arma_err,
             "o",
@@ -131,31 +132,38 @@ def main(N, tol):
         fig = plt.gcf()
         fig.set_size_inches((16, 11), forward=False)
 
-        plt.title("total relative difference between each method")
+        plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+        legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+        frame = legend.get_frame()
+        frame.set_facecolor('white')
+
+        plt.title("Total relative difference between each method")
         plt.xlabel("N")
         plt.ylabel("relative difference")
         plt.legend()
         plt.show()
 
     with plt.style.context("seaborn-darkgrid"):
-        plt.plot(N, time_arma, "o", color="firebrick", label="armadillo")
-        plt.plot(N, time_Jac, "o", color="forestgreen", label="Jacobi method")
+        f, ax = plt.subplots(1, 1, dpi=100, frameon=True)
+        ax.plot(N, time_arma, "o", color="firebrick", label="armadillo")
+        ax.plot(N, time_Jac, "o", color="forestgreen", label="Jacobi method")
+
         plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
         plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
         legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
         frame = legend.get_frame()
         frame.set_facecolor('white')
-        plt.title("Time for solving")
+        plt.title("Time of solving")
         plt.xlabel("N")
         plt.ylabel("Time, [s]")
         plt.legend()
         plt.show()
 
 
-
 if __name__ == "__main__":
     if "compile" in sys.argv:
         compile()
-    n = np.arange(10, 251, 5)
+    n = np.arange(10, 201, 5)
     tolerance = 12
     main(n, tolerance)
