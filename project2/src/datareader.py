@@ -38,3 +38,22 @@ def read_data(filename="data.dat"):
         instance = SolvedSystem(block)
         instances[instance.name] = instance
     return instances
+
+
+def read_arma(filename="data.dat"):
+    with open("data/" + filename, "r") as file:
+        vals = []
+        vecs = []
+        lines = file.readlines()
+        print(lines)
+        sys.exit()
+        try:
+            n, time = lines[0].split(",")
+        except:
+            print(lines)
+        for i in range(len(lines) - 1):
+            V = [float(v) for v in lines[i + 1].split(",")]
+            vals.append(V[0])
+            vecs.append(V[1:])
+    return np.asarray(vals), np.asarray(vecs), float(time)
+

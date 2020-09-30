@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib as mpl
-from datareader import read_data
+from datareader import read_data, read_arma
 from argHandler import argHandler
 from colour import Color
 from master import run
@@ -37,6 +37,8 @@ Any extraordinary parameters (different from the 6 mentioned above) is noted bel
 
 the different functions are:
 - transforms: Plots the counted transforms of a simulated system as a function of n.
+
+- timer: Plots the time spent solving the three problems as function of n.
 
 - optimalRhomaxSingleElectron: Plots eigval rel. error as a function of rhomax. Prints lowest relative error and corresponding rhomax
 
@@ -103,7 +105,7 @@ def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], met
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}:")
 
 
-def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 0.5, 1, 5]], method=[0, 1, 2], sim=False, datafile="data.dat"):
+def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 5]], method=[0, 1, 2], sim=False, datafile="data.dat"):
     # plots elapsed time of solving against N on axis ax, as well as comparing to n**2 and n**2*ln(n)
     if sim:
         print("Solving ...")
@@ -136,7 +138,7 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 0.5, 1
             color = {0:["red"], 1:["blue"], 2:["lime", "mediumseagreen", "seagreen", "darkgreen"]}[method_][i] #every method gets unique color
             label = {0:"Buckling beam", 1:r"Quantum 1, $\rho_{max} = $"+str(rhomax[method_]), 2:r"Quantum 2, $\rho_{max} = $"+f"{rhomax[method_]}, $\omega_r = {wi}$"}[method_]
 
-            ax.plot(n, tim, "-o", markersize=2.5, color=color, alpha=0.8, lw=2.8, label=label)
+            ax.plot(n, tim, "-o", markersize=12, color=color, alpha=0.8, lw=5, label=label)
 
             plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
             plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
@@ -149,6 +151,29 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 0.5, 1
 
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}:")
 
+
+def time_armadillo(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data.dat"):
+
+    arma = []
+    jacobi = []
+    print("Solving ...")
+    start = time.time()
+    for _n in n:
+        open(f"data/{datafile}", "w").close() # clear file
+        subprocess.run(f"./arma.out {n} {datafile}".split())
+        _, _, t = read_arma(datafile)
+        arma.append(t)
+
+        open(f"data/{datafile}", "w").close() # clear file1
+        subprocess.run(f"./main.out {n}{eps}{rho_max}{method}{omega} {n} {eps} {rho_max} {method} {omega} {datafile}".split())
+        t = read_data(datafile).time
+        jacobi.append(t)
+
+        print(f"ρ: {round(_n,3)}/{n[-1]}, {round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %")
+    print(f"Done in {round(time.time()- start,3)} s")
+
+    print(arma)
+    print(jacobi)
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
 

@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 		}
 		datafile << endl;
 	}
+	datafile.close();
+	cout << "done"<< endl;
 	return 0;
 }
 
