@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib as mpl
-from datareader import read_data, read_arma
+from datareader import read_data, read_arma, mat_sort_by_array
 from argHandler import argHandler
 from colour import Color
 from master import run
@@ -65,8 +65,8 @@ options:
     -params must follow argHandler formating (see argHandler.py)
 """
 
-font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
-plt.rc("font", **font)
+# font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
+# plt.rc("font", **font)
 
 def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], method = [0,1,2], sim=False, datafile="data.dat"):
     # plots num of transformations against N on axis ax, as well as comparing to n**2 and n**2*ln(n)
@@ -87,7 +87,7 @@ def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], met
     sols = read_data(datafile) #all solutions
     for method_ in method: # all methods are plotted
         trans = np.array([sols[f"{N}{eps}{rhomax[method_]}{method_}{omega[method_]}"].transformations for N in n]) # array of counted transformations
-        
+
         coeff, residual, rank, sv, cond = np.polyfit(np.log10(n), np.log10(trans), deg =1, full=True)
         print(f"a = {coeff[0]} +- {residual[0]}")
         color = {0:"red", 1:"blue", 2:"green"}[method_] #every method gets unique color
@@ -154,30 +154,102 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 5]], m
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}:")
 
 
-def time_armadillo(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data2.dat"):
-
+def timeArmadilloBeam(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data.dat"):
     arma = []
     jacobi = []
     print("Solving ...")
     start = time.time()
     
     for _n in n:
-        # open(f"data/{datafile}", "w").close() # clear file
-        # subprocess.run(f"./arma.out {n} {datafile}".split())
-        # _, _, t = read_arma(datafile)
-        # arma.append(t)
+        open(f"data/{datafile}", "w").close() # clear file
+        subprocess.run(f"./arma.out {_n} {datafile}".split())
+        _, _, t = read_arma(datafile)
+        arma.append(t)
 
-        #open(f"data/{datafile}", "w").close() # clear file1
+        open(f"data/{datafile}", "w").close() # clear file1
         subprocess.run(f"./main.out {_n}{eps}{rho_max}{method}{omega} {_n} {eps} {rho_max} {method} {omega} {datafile}".split())
-        t = read_data(datafile)
-        print(t)
+        t = read_data(datafile)[f"{_n}{eps}{rho_max}{method}{omega}"].time
         jacobi.append(t)
 
         print(f"ρ: {round(_n,3)}/{n[-1]}, {round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %")
     print(f"Done in {round(time.time()- start,3)} s")
 
-    print(arma)
-    print(jacobi)
+    arma = np.log10(np.asarray(arma))
+    jacobi = np.log10(np.asarray(jacobi))
+    n = np.log10(n)
+    Aa, Ab = np.polyfit(n, arma, deg=1)
+    Ja, Jb = np.polyfit(n, jacobi, deg=1)
+
+    ax.plot(n, jacobi, "-o", ms=16, lw=8, color="red", label=f"jacobi")
+    ax.plot(n, arma, "-o", ms=16, lw=8, color="gold", label=f"armadillo")
+
+    x = np.linspace(n[0], n[-1], 1000)
+    ax.plot(x, Ja * x + Jb, ms=2.5, color="red", lw=8, alpha=0.8, label=f"fit jacobi, a={round(Ja, 4)}")
+    ax.plot(x, Aa * x + Ab, ms=2.5, color="gold", lw=8, alpha=0.8, label=f"fir armadillo, a={round(Aa, 4)}")
+
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+    legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+    frame = legend.get_frame().set_facecolor('white')
+    ax.set_xlabel("Matrix size, log(n)")
+    ax.set_ylabel("Time, log(s)")
+    ax.set_title("Time comparison between jacobi and armadillo")
+    plt.tight_layout()
+
+
+def error(n=[40, 80], rhomax=[1,10,20], eps=12, omega=[0,1,5], method=[0], sim=False, datafile="data.dat"):
+    def analytical_beam(n):
+        if method_ == 0:
+            N = n + 1
+            d = 2 * N ** 2
+            vals = np.asarray([d * (1 - np.cos(j * np.pi / N)) for j in range(1, N)])
+            vecs = np.zeros((n,n))
+            for j in range(1,N):
+                vec = np.asarray([np.sin(i * j * np.pi / N) for i in range(1, N)])
+                vecs[:, j - 1] = vec / np.linalg.norm(vec)
+            return vals, vecs
+
+    if sim:
+        print("Solving ...")
+
+        open(f"data/{datafile}", "w+").close() # clear file
+        for method_ in method:
+            if method_ != 0:
+                print("Error for this has not been implemented")
+                continue
+            start = time.time()
+            for _n in n:
+                subprocess.run(f"./main.out {_n}{eps}{rhomax[method_]}{method_}{omega[method_]} {_n} {eps} {rhomax[method_]} {method_} {omega[method_]} {datafile}".split())
+                print(f"{round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %, N: {_n}, eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}")
+            print(f"Finished in {round(time.time() -start,3)} s.")
+
+    sols = read_data(datafile)
+    beam_err = []
+    for method_ in method:
+        if method_ != 0:
+            print("Error for this has not been implemented")
+            continue
+
+        for _n in n:
+            data = sols[f"{_n}{eps}{rhomax[method_]}{method_}{omega[method_]}"]
+            vals = data.eigvals
+            vecs = data.eigvecs
+            vecs, vals = mat_sort_by_array(vecs, vals)
+            avals, avecs = analytical_beam(_n, method_)
+
+            err_vals = np.log10(abs(np.sum(abs(vals - avals) / avals)) / _n)
+            err_vecs = np.log10(abs(np.sum(abs(vecs - avecs) / avecs)) / _n / _n)
+
+            # print(err_vals)
+            # print(err_vecs)
+            beam_err.append(err_vecs)
+            # plt.plot(_n, err_vecs)
+            # plt.plot(_n, err_vals)
+
+    plt.plot(n, beam_err)
+
+
+
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
 
@@ -313,11 +385,41 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 1
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
 
+def wavefunctionTwoElectron(n=100, method=[1,2], eps=12, rho_max=4.827, omega=[0.01, 0.5, 1, 5], sim=False, datafile="data.dat"):
+    beta_esq = 1.44  # eVnm
+    chbar = 1240 # eVnm
+    me = 0.511 # eV
+    alpha = chbar ** 2 / me / beta_esq
+
+    if "__iter__" not in dir(omega):
+        omega = [omega]
+
+    if sim:
+        open(f"data/{datafile}", "w").close() # clear file
+        for method_ in method:
+            for w in omega:
+                subprocess.run(f"./main.out {n}{eps}{rho_max}{w}{method_} {n} {eps} {rho_max} {method_} {w} {datafile}".split())
+
+    sols = read_data(datafile)
+    for method_ in method:
+        for w in omega:
+            data = sols[f"{n}{eps}{rho_max}{w}{method_}"]
+            vals = data.eigvals
+            vecs = data.eigvecs
+            vecs /= np.linalg.norm(vecs, axis=0)
+            vecs, vals = mat_sort_by_array(vecs, vals)
+            rho = np.linspace(0, data.pmax, data.n)
+
+            for i in range(1):
+                print(np.linalg.norm(vecs[:, i]))
+                plt.plot(rho, vecs[:, i] ** 2)
+
+
 
 
 if __name__ == "__main__":
     with plt.style.context("seaborn-darkgrid"):
-        f, ax = plt.subplots(1,1, dpi=100,frameon=True)
+        f, ax = plt.subplots(1,1, dpi=175,frameon=True)
         defaults = {"datafile":"data.dat"}
 
         if "help" in sys.argv:
