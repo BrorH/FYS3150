@@ -45,7 +45,6 @@ def read_arma(filename="data.dat"):
         vals = []
         vecs = []
         lines = file.readlines()
-        print(lines)
         n, time = lines[0].split(",")
         for i in range(len(lines) - 1):
             V = [float(v) for v in lines[i + 1].split(",")]
