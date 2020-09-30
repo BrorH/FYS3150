@@ -57,20 +57,6 @@ the different functions are:
 - wavefunctionTwoElectron: Plots the eigenvector corrosponding to the smallest eigenvalue for the specified method
 """
 
-"""
-MAIN PROGRAM FOR PLOTTING AND CREATING THE FIGURES IN THE PAPER
-
-# COLOR must be installed before running
-# must make a data/ folder
-
-Consists of several functions that each create a single plot.
-only one plot can be made each call of this program.
-parameters:
-    -plottype, must br first. is just the name of the function (see list below)
-options:
-    -params must follow argHandler formating (see argHandler.py)
-"""
-
 # font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
 # plt.rc("font", **font)
 
@@ -212,7 +198,7 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
             vec = np.asarray([np.sin(i * np.pi / N) for i in range(1, n + 1)])
             return vals, vec
         elif method == 1:
-            vals = [4 * i + 3 for i in range(n)]
+            vals = np.array([4 * i + 3 for i in range(n)])
             return vals, np.zeros(n)
         elif method == 2:
             r0 = (2 * omega_r ** 2) ** (-1/3)
@@ -239,7 +225,7 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
 
     sols = read_data(datafile)
     error = {}
-    prob = {0: "beam", 1: "q1", 2: "q2"}
+    prob = {0: "Buckling Beam", 1: "Single Electron", 2: "Double Electron"}
     for met in method:
         error[met] = []
         print
@@ -257,6 +243,8 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
                 rho = np.linspace(0, data.pmax, _n)
 
                 avals, avec = analytic(_n, met, rho, w)
+                print(avec)
+                print("AAAAAAAAa")
                 avec /= np.linalg.norm(avec)
                 
                 # err_val = sum(abs(vals - avals) / avals)
@@ -264,16 +252,19 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
 
                 # error[met][-1]["err"].append([err_val, err_vec])
             fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
-            ax.plot(rho, vec, "r", lw=5, label=f"Eigenvector for {prob[met]}. $\lambda$ = {round(min(vals), 4)}, $\omega_r$ = {w}")
-            ax.plot(rho+0.25, avec, "k", lw=5, label=f"Analytic eigenvector")
+            ax.plot(rho, vec, "r", lw=5, label=f"Eigenvector for {prob[met]}")
+            print(rho)
+            print()
+            print(avec)
+            ax.plot(rho, avec, "k", lw=5, label=f"Analytic eigenvector")
 
         plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
         plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
         legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
         frame = legend.get_frame().set_facecolor('white')
         ax.set_xlabel("Matrix size, log(n)")
-        ax.set_ylabel("value")
-        ax.set_title(f"Eigenvalue for {prob[met]}")
+        ax.set_ylabel("Amplitude")
+        ax.set_title(f"Eigenvector for {prob[met]}")
         plt.tight_layout()
         plt.show()
 
@@ -412,9 +403,87 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=4.827, eps 
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
 
+def error(n=[40, 80], rhomax=[1,10,20], eps=12, omega=[0,1,5], method=[0], sim=False, datafile="data.dat"):
+    def analytical_beam(n, *args):
+        if method_ == 0:
+            N = n + 1
+            d = 2 * N ** 2
+            vals = np.asarray([d * (1 - np.cos(j * np.pi / N)) for j in range(1, N)])
+            vecs = np.zeros((n,n))
+            for j in range(1,N):
+                vec = np.asarray([np.sin(i * j * np.pi / N) for i in range(1, N)])
+                vecs[:, j - 1] = vec / np.linalg.norm(vec)
+            return vals, vecs
+ label=f"$\omega = {omega[i]}$, norm: {round(np.linalg.norm(vecs[:, i]),3)}"
+    if sim:
+        print("Solving ...")
+
+        open(f"data/{datafile}", "w+").close() # clear file
+        for method_ in method:
+            if method_ != 0:
+                print("Error for this has not been implemented")
+                continue
+            start = time.time()
+            for _n in n:
+                subprocess.run(f"./main.out {_n}{eps}{rhomax[method_]}{method_}{omega[method_]} {_n} {eps} {rhomax[method_]} {method_} {omega[method_]} {datafile}".split())
+                print(f"{round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %, N: {_n}, eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}")
+            print(f"Finished in {round(time.time() -start,3)} s.")
+
+    sols = read_data(datafile)
+    beam_err = []
+    for method_ in method:
+        if method_ != 0:
+            print("Error for this has not been implemented")
+            continue
+
+        for _n in n:
+            data = sols[f"{_n}{eps}{rhomax[method_]}{method_}{omega[method_]}"]
+            vals = data.eigvals
+            vecs = data.eigvecs
+            vecs, vals = mat_sort_by_array(vecs, vals)
+            avals, avecs = analytical_beam(_n, method_)
+
+            err_vals = np.log10(abs(np.sum(abs(vals - avals) / avals)) / _n)
+            err_vecs = np.log10(abs(np.sum(abs(vecs - avecs) / avecs)) / _n / _n)
+
+            # print(err_vals)
+            # print(err_vecs)
+            beam_err.append(err_vecs)
+            # plt.plot(_n, err_vecs)
+            # plt.plot(_n, err_vals)
+
+    plt.plot(n, beam_err)
 
 
+def wavefunctionTwoElectron(n=100, method=[1,2], eps=12, rho_max=4.827, omega=[0.01, 0.5, 1, 5], sim=False, datafile="data.dat"):
+    beta_esq = 1.44  # eVnm
+    chbar = 1240 # eVnm
+    me = 0.511 # eV
+    alpha = chbar ** 2 / me / beta_esq
 
+    if "__iter__" not in dir(omega):
+        omega = [omega]
+
+    if sim:
+        open(f"data/{datafile}", "w").close() # clear file
+        for method_ in method:
+            for w in omega:
+                subprocess.run(f"./main.out {n}{eps}{rho_max}{w}{method_} {n} {eps} {rho_max} {method_} {w} {datafile}".split())
+
+    sols = read_data(datafile)
+    for method_ in method:
+        for w in omega:
+            data = sols[f"{n}{eps}{rho_max}{w}{method_}"]
+            vals = data.eigvals
+            vecs = data.eigvecs
+            vecs /= np.linalg.norm(vecs, axis=0)
+            vecs, vals = mat_sort_by_array(vecs, vals)
+            rho = np.linspace(0, data.pmax, data.n)
+
+            for i in range(1):
+                print(np.linalg.norm(vecs[:, i]))
+                ax.plot(rho, vecs[:, i] ** 2, lw=2,) #  label=f"$\omega = {omega[i]}$, norm: {round(np.linalg.norm(vecs[:, i]),3)}"
+    ax.legend([f"$\omega = {omega_}$" for omega_ in omega])
 if __name__ == "__main__":
     with plt.style.context("seaborn-darkgrid"):
         f, ax = plt.subplots(1,1, dpi=175,frameon=True)
