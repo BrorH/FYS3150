@@ -87,7 +87,7 @@ def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], met
     sols = read_data(datafile) #all solutions
     for method_ in method: # all methods are plotted
         trans = np.array([sols[f"{N}{eps}{rhomax[method_]}{method_}{omega[method_]}"].transformations for N in n]) # array of counted transformations
-        
+
         coeff, residual, rank, sv, cond = np.polyfit(np.log10(n), np.log10(trans), deg =1, full=True)
         print(f"a = {coeff[0]} +- {residual[0]}")
         color = {0:"red", 1:"blue", 2:"green"}[method_] #every method gets unique color
@@ -154,28 +154,46 @@ def timer(n=range(1, 10), rhomax=[1, 10, 20], eps=12, omega=[0, 1, [0.01, 5]], m
         print(f" eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {wi}:")
 
 
-def time_armadillo(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data.dat"):
-
+def timeArmadilloBeam(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, method=0, datafile="data.dat"):
     arma = []
     jacobi = []
     print("Solving ...")
     start = time.time()
     for _n in n:
         open(f"data/{datafile}", "w").close() # clear file
-        subprocess.run(f"./arma.out {n} {datafile}".split())
+        subprocess.run(f"./arma.out {_n} {datafile}".split())
         _, _, t = read_arma(datafile)
         arma.append(t)
 
         open(f"data/{datafile}", "w").close() # clear file1
-        subprocess.run(f"./main.out {n}{eps}{rho_max}{method}{omega} {n} {eps} {rho_max} {method} {omega} {datafile}".split())
-        t = read_data(datafile).time
+        subprocess.run(f"./main.out {_n}{eps}{rho_max}{method}{omega} {_n} {eps} {rho_max} {method} {omega} {datafile}".split())
+        t = read_data(datafile)[f"{_n}{eps}{rho_max}{method}{omega}"].time
         jacobi.append(t)
 
         print(f"ρ: {round(_n,3)}/{n[-1]}, {round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %")
     print(f"Done in {round(time.time()- start,3)} s")
 
-    print(arma)
-    print(jacobi)
+    arma = np.log10(np.asarray(arma))
+    jacobi = np.log10(np.asarray(jacobi))
+    n = np.log10(n)
+    Aa, Ab = np.polyfit(n, arma, deg=1)
+    Ja, Jb = np.polyfit(n, jacobi, deg=1)
+
+    ax.plot(n, jacobi, "-o", ms=12, lw=2.8, color="red", label=f"jacobi")
+    ax.plot(n, arma, "-o", ms=12, lw=2.8, color="gold", label=f"armadillo")
+
+    x = np.linspace(n[0], n[-1], 1000)
+    ax.plot(x, Ja * x + Jb, ms=2.5, color="red", lw=2.8, alpha=0.8, label=f"fit jacobi, a={round(Ja, 4)}")
+    ax.plot(x, Aa * x + Ab, ms=2.5, color="gold", lw=2.8, alpha=0.8, label=f"fir armadillo, a={round(Aa, 4)}")
+
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+    legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+    frame = legend.get_frame().set_facecolor('white')
+    ax.set_xlabel("Matrix size, log(n)")
+    ax.set_ylabel("Time, log(s)")
+    ax.set_title("Time comparison between jacobi and armadillo")
+
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
 
