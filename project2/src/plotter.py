@@ -384,8 +384,35 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350)), rhomax=20, eps = 12, 
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
 
-def wavefunctionTwoElectron(n=100, method=2, eps=12, rho_max=4.827, omega=[0.01, 0.5, 1, 5], sim=False, datafile="data.dat"):
-    pass
+def wavefunctionTwoElectron(n=100, method=[1,2], eps=12, rho_max=4.827, omega=[0.01, 0.5, 1, 5], sim=False, datafile="data.dat"):
+    beta_esq = 1.44  # eVnm
+    chbar = 1240 # eVnm
+    me = 0.511 # eV
+    alpha = chbar ** 2 / me / beta_esq
+
+    if "__iter__" not in dir(omega):
+        omega = [omega]
+
+    if sim:
+        open(f"data/{datafile}", "w").close() # clear file
+        for method_ in method:
+            for w in omega:
+                subprocess.run(f"./main.out {n}{eps}{rho_max}{w}{method_} {n} {eps} {rho_max} {method_} {w} {datafile}".split())
+
+    sols = read_data(datafile)
+    for method_ in method:
+        for w in omega:
+            data = sols[f"{n}{eps}{rho_max}{w}{method_}"]
+            vals = data.eigvals
+            vecs = data.eigvecs
+            vecs /= np.linalg.norm(vecs, axis=0)
+            vecs, vals = mat_sort_by_array(vecs, vals)
+            rho = np.linspace(0, data.pmax, data.n)
+
+            for i in range(1):
+                print(np.linalg.norm(vecs[:, i]))
+                plt.plot(rho, vecs[:, i] ** 2)
+
 
 
 
