@@ -57,9 +57,6 @@ the different functions are:
 - wavefunctionTwoElectron: Plots the eigenvector corrosponding to the smallest eigenvalue for the specified method
 """
 
-# font = {"family": "DejaVu Sans", "weight": "normal", "size": 18}
-# plt.rc("font", **font)
-
 def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], method = [0,1,2], sim=False, datafile="data.dat"):
     # plots num of transformations against N on axis ax, as well as comparing to n**2 and n**2*ln(n)
     if sim:
@@ -188,7 +185,7 @@ def timeArmadilloBeam(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, meth
     ax.set_title("Time comparison between jacobi and armadillo")
     plt.tight_layout()
 
-def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omega=[0,1,5], method=[0,1,2], sim=False, datafile="data.dat"):
+def analytical_comparison(n=np.arange(20, 151, 10), eps=12, rhomax=[1,5,5], omega=[0,1,[0.01, 0.5,1,5]], method=[0,1,2], sim=False, datafile="data.dat"):
     def analytic(n, method, r, omega_r):
         if method == 0:
             N = 1000
@@ -227,6 +224,7 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
     error = {}
     prob = {0: "Buckling Beam", 1: "Single Electron", 2: "Double Electron"}
     for met in method:
+        fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
         error[met] = []
         print
         W = omega[met]
@@ -246,9 +244,6 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
                 print(avec)
                 print("AAAAAAAAa")
                 avec /= np.linalg.norm(avec)
-                
-                # err_val = sum(abs(vals - avals) / avals)
-                # err_vec = sum(abs(vec - avec) / avec)
 
                 # error[met][-1]["err"].append([err_val, err_vec])
             fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
@@ -268,6 +263,47 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
         plt.tight_layout()
         plt.show()
 
+    fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
+    for met in range(3):
+        run = error[met]
+        for err in run:
+            errs = np.asarray(err["err"])
+            if err["w"] in (5,):
+                continue
+            val, vec = errs.T
+            # plt.plot(n, val, "--", lw=5, label=f"error in value, {prob[met]}, $\omega$={err['w']}")
+            plt.plot(n, np.log10(vec), lw=5, label=f"{prob[met]}, $\omega$={err['w']}")
+
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+    legend = ax.legend(loc=8, fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+    frame = legend.get_frame().set_facecolor('white')
+    ax.set_xlabel("Matrix size, log(n)")
+    ax.set_ylabel("total relative error")
+    ax.set_title(f"Total relative error in eigenvectors")
+    plt.tight_layout()
+    plt.show()
+
+    fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
+    for met in range(3):
+        run = error[met]
+        for err in run:
+            errs = np.asarray(err["err"])
+            if err["w"] in (0.01,):
+                continue
+            val, vec = errs.T
+            plt.plot(n, val, "--", lw=5, label=f"{prob[met]}, $\omega$={err['w']}")
+            # plt.plot(n, vec, lw=5, label=f"error in vector, {prob[met]}, $\omega$={err['w']}")
+
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+    legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+    frame = legend.get_frame().set_facecolor('white')
+    ax.set_xlabel("Matrix size, log(n)")
+    ax.set_ylabel("total relative error")
+    ax.set_title(f"Total relative error in eigenvalues")
+    plt.tight_layout()
+    plt.show()
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
 
