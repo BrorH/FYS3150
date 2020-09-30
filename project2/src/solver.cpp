@@ -76,6 +76,27 @@ void Solver::checkSymmetry(double tol = 1e-5){
     }
 }
 
+void Solver::checkMaxIdx(){
+    // checks if the maxIdx values calculated are correct
+    int k, l;
+    findMaxIdx();
+    k = maxidx[0];
+    l = maxidx[1];
+    double Amax = A[k][l];
+    
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(i == j){ continue;}
+            if (abs(Amax)< abs(A[i][j])){
+
+    cout << maxidx[0] << " a " << maxidx[1] << endl;
+                cout << A[l][k] << " " << A[k][l] <<endl;
+                cout << "findMaxIdx returned wrong value! Assumed largest: " << abs(Amax) << " vs. found: "<< abs(A[i][j]) << endl;
+                }
+        }
+    }
+}
+
 void Solver::findMaxIdx(){
     // burde optimaliseres
     double maxval = 0;
@@ -140,6 +161,7 @@ void Solver::solve()
     clock_t start = clock();
 
     transforms = 0;
+    int unitTestIter = (int)((double)n/pow(log10(n),-5)); // perform 5 unit tests each solution. (6 if n%5 = 0)
     max_A = 2*eps; // Set a higher start value
 
     while (max_A > eps) // loop while the maximum non-diagonal value in A is below threshold
@@ -159,14 +181,16 @@ void Solver::solve()
         s = c*t;
 
         rotateA(c,s); // perform the unitary transform
-
-        if(transforms%100 == 0){
-            // Do unit tests every so often.
+        //cout << (transforms +1 )%(int)(n/NoOfUnitTests) << " " << (int)(n/NoOfUnitTests)  << endl;
+        transforms ++; // update counter
+        if((transforms)%unitTestIter == 0){
+            // Do unit tests 3-4 times
+            cout << "unit test" << transforms%unitTestIter<< endl;
             checkOrthog();
             checkSymmetry();
-            // ONE MORE!
+            checkMaxIdx();
+            
         }
-        transforms ++; // update counter
     }
     clock_t end = clock();
     time = ((end - start) / (double)CLOCKS_PER_SEC);

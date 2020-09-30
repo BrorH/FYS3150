@@ -24,6 +24,7 @@ private:
     bool unitTest();
     void checkOrthog(double tol);
     void checkSymmetry(double tol);
+    void checkMaxIdx();
 
 
 public:
