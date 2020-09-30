@@ -84,6 +84,8 @@ def transforms(n=range(1,10), rhomax = [1,10,20], eps = 12, omega = [0,1,5], met
     for method_ in method: # all methods are plotted
         trans = np.array([sols[f"{N}{eps}{rhomax[method_]}{method_}{omega[method_]}"].transformations for N in n]) # array of counted transformations
         
+        coeff, residual, rank, sv, cond = np.polyfit(np.log10(n), np.log10(trans), deg =1, full=True)
+        print(f"a = {coeff[0]} +- {residual[0]}")
         color = {0:"red", 1:"blue", 2:"green"}[method_] #every method gets unique color
         label = {0:"Buckling beam", 1:r"Quantum 1, $\rho_{max} = $"+str(rhomax[method_]), 2:r"Quantum 2, $\rho_{max} = $"+f"{rhomax[method_]}, $\omega_r = {omega[method_]}$"}[method_]
 
