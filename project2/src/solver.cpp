@@ -161,7 +161,7 @@ void Solver::solve()
     clock_t start = clock();
 
     transforms = 0;
-    int unitTestIter = (int)((double)n/pow(log10(n),-5)); // perform 5 unit tests each solution. (6 if n%5 = 0)
+    int unitTestIter = (int)((double)n/pow(log10(n),-5)); 
     max_A = 2*eps; // Set a higher start value
 
     while (max_A > eps) // loop while the maximum non-diagonal value in A is below threshold
@@ -181,14 +181,12 @@ void Solver::solve()
         s = c*t;
 
         rotateA(c,s); // perform the unitary transform
-        //cout << (transforms +1 )%(int)(n/NoOfUnitTests) << " " << (int)(n/NoOfUnitTests)  << endl;
         transforms ++; // update counter
         if((transforms)%unitTestIter == 0){
-            // Do unit tests 3-4 times
-            cout << "unit test" << transforms%unitTestIter<< endl;
-            checkOrthog();
-            checkSymmetry();
-            checkMaxIdx();
+            // Do some unit tests.
+            //checkOrthog();
+            //checkSymmetry();
+            //checkMaxIdx();
             
         }
     }
