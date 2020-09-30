@@ -52,3 +52,18 @@ def read_arma(filename="data.dat"):
             vecs.append(V[1:])
     return np.asarray(vals), np.asarray(vecs), float(time)
 
+
+def mat_sort_by_array(mat, vec):
+    idx = np.argsort(vec)
+
+    vec2 = np.sort(vec)
+    mat2 = mat[:, idx[0]]
+    if mat2[0] < 0:
+        mat2 *= -1
+    for i in idx[1:]:
+        tmp = mat[:, i]
+        if tmp[0] < 0:
+            tmp *= -1
+        mat2 = np.vstack((mat2, tmp))
+    return mat2.T, vec2
+
