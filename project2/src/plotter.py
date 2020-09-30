@@ -40,6 +40,10 @@ the different functions are:
 
 - timer: Plots the time spent solving the three problems as function of n.
 
+- timerArmadilloBeam: Plots the time spent by our Jacobi algorithm, together with armadillos eig_sym, as function of n
+
+- error: Plots the total relative error in our solver, compared to the respective analytical expressions
+
 - optimalRhomaxSingleElectron: Plots eigval rel. error as a function of rhomax. Prints lowest relative error and corresponding rhomax
 
 - eigvalsSingleElectron: Plots the numerical eigenvalues of the single electron system against either n or rhomax.
@@ -49,6 +53,8 @@ the different functions are:
 - eigvalAccuracySingleElectron: Plots eigval accuracy against n and attemps a function fit of shape a*log10(n)+b
     special parameters:
         - fitIdxStart: The index of n where the function fit begins
+
+- wavefunctionTwoElectron: Plots the eigenvector corrosponding to the smallest eigenvalue for the specified method
 """
 
 """
@@ -159,7 +165,7 @@ def timeArmadilloBeam(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, meth
     jacobi = []
     print("Solving ...")
     start = time.time()
-    
+
     for _n in n:
         open(f"data/{datafile}", "w").close() # clear file
         subprocess.run(f"./arma.out {_n} {datafile}".split())
@@ -196,59 +202,79 @@ def timeArmadilloBeam(n=np.arange(10, 151, 10), rho_max=1, eps=12, omega=0, meth
     ax.set_title("Time comparison between jacobi and armadillo")
     plt.tight_layout()
 
-
-def error(n=[40, 80], rhomax=[1,10,20], eps=12, omega=[0,1,5], method=[0], sim=False, datafile="data.dat"):
-    def analytical_beam(n):
-        if method_ == 0:
+def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omega=[0,1,5], method=[0,1,2], sim=False, datafile="data.dat"):
+    def analytic(n, method, r, omega_r):
+        if method == 0:
+            N = 1000
             N = n + 1
             d = 2 * N ** 2
-            vals = np.asarray([d * (1 - np.cos(j * np.pi / N)) for j in range(1, N)])
-            vecs = np.zeros((n,n))
-            for j in range(1,N):
-                vec = np.asarray([np.sin(i * j * np.pi / N) for i in range(1, N)])
-                vecs[:, j - 1] = vec / np.linalg.norm(vec)
-            return vals, vecs
+            vals = np.asarray([d * (1 - np.cos(j * np.pi / N)) for j in range(1, n + 1)])
+            vec = np.asarray([np.sin(i * np.pi / N) for i in range(1, n + 1)])
+            return vals, vec
+        elif method == 1:
+            vals = [4 * i + 3 for i in range(n)]
+            return vals, np.zeros(n)
+        elif method == 2:
+            r0 = (2 * omega_r ** 2) ** (-1/3)
+            V0 = 3/2 * (omega_r / 2) ** (2 / 3)
+            we = np.sqrt(3) * omega_r
+
+            vals = [V0 + we * (m + 0.5) for m in range(n)]
+            vec = (we / np.pi) ** (1/4) * np.exp(-we / 2 * (r - r0) ** 2)
+            return vals, vec
 
     if sim:
-        print("Solving ...")
-
+        print("Solving...")
         open(f"data/{datafile}", "w+").close() # clear file
-        for method_ in method:
-            if method_ != 0:
-                print("Error for this has not been implemented")
-                continue
-            start = time.time()
-            for _n in n:
-                subprocess.run(f"./main.out {_n}{eps}{rhomax[method_]}{method_}{omega[method_]} {_n} {eps} {rhomax[method_]} {method_} {omega[method_]} {datafile}".split())
-                print(f"{round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %, N: {_n}, eps: {eps}, method: {method_}, rhomax: {rhomax[method_]}, omega: {omega[method_]}")
-            print(f"Finished in {round(time.time() -start,3)} s.")
+        start = time.time()
+        for met in method:
+            W = omega[met]
+            if "__iter__" not in dir(W):
+                W = [W]
+            for w in W:
+                for _n in n:
+                    subprocess.run(f"./main.out {_n}{eps}{rhomax[met]}{met}{w} {_n} {eps} {rhomax[met]} {met} {w} {datafile}".split())
+                    print(f"{round(100*(_n-n[0])/(n[-1]-n[0]), 2)} %, N: {_n}, eps: {eps}, method: {met}, rhomax: {rhomax[met]}, omega: {w}")
+                print(f"Finished in {round(time.time() -start,3)} s.")
 
     sols = read_data(datafile)
-    beam_err = []
-    for method_ in method:
-        if method_ != 0:
-            print("Error for this has not been implemented")
-            continue
+    error = {}
+    prob = {0: "beam", 1: "q1", 2: "q2"}
+    for met in method:
+        error[met] = []
+        print
+        W = omega[met]
+        if "__iter__" not in dir(W):
+            W = [W]
+        for w in W:
+            error[met].append({"w": w, "err": []})
+            for _n in n:
+                data = sols[f"{_n}{eps}{rhomax[met]}{met}{w}"]
+                vals = data.eigvals
+                vecs = data.eigvecs
+                idx = np.argmin(vals)
+                vec = vecs[:, idx]
+                rho = np.linspace(0, data.pmax, _n)
 
-        for _n in n:
-            data = sols[f"{_n}{eps}{rhomax[method_]}{method_}{omega[method_]}"]
-            vals = data.eigvals
-            vecs = data.eigvecs
-            vecs, vals = mat_sort_by_array(vecs, vals)
-            avals, avecs = analytical_beam(_n, method_)
+                avals, avec = analytic(_n, met, rho, w)
+                avec /= np.linalg.norm(avec)
+                # err_val = sum(abs(vals - avals) / avals)
+                # err_vec = sum(abs(vec - avec) / avec)
 
-            err_vals = np.log10(abs(np.sum(abs(vals - avals) / avals)) / _n)
-            err_vecs = np.log10(abs(np.sum(abs(vecs - avecs) / avecs)) / _n / _n)
+                # error[met][-1]["err"].append([err_val, err_vec])
+            fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
+            ax.plot(rho, vec, "r", lw=5, label=f"Eigenvector for {prob[met]}. $\lambda$ = {round(min(vals), 4)}, $\omega_r$ = {w}")
+            ax.plot(rho, avec, "k", lw=5, label=f"Analytic eigenvector")
 
-            # print(err_vals)
-            # print(err_vecs)
-            beam_err.append(err_vecs)
-            # plt.plot(_n, err_vecs)
-            # plt.plot(_n, err_vals)
-
-    plt.plot(n, beam_err)
-
-
+        plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
+        legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, frameon=True, fontsize="x-small")
+        frame = legend.get_frame().set_facecolor('white')
+        ax.set_xlabel("Matrix size, log(n)")
+        ax.set_ylabel("value")
+        ax.set_title(f"Eigenvalue for {prob[met]}")
+        plt.tight_layout()
+        plt.show()
 
 
 def optimalRhomaxSingleElectron(n= 100,rhomax = np.linspace(3.2,5.7, 1000), eps = 12, omega=1, method=1, sim = False, datafile = "data.dat" ):
@@ -384,37 +410,6 @@ def eigvalAccuracySingleElectron(n = list(range(10, 350,10)), rhomax=20, eps = 1
     legend = ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=0.4, frameon = True,loc='lower right')
     legend.get_frame().set_facecolor('white')
     ax.set_title(f"Number of correct digits in eigenvalues")
-
-def wavefunctionTwoElectron(n=100, method=[1,2], eps=12, rho_max=4.827, omega=[0.01, 0.5, 1, 5], sim=False, datafile="data.dat"):
-    beta_esq = 1.44  # eVnm
-    chbar = 1240 # eVnm
-    me = 0.511 # eV
-    alpha = chbar ** 2 / me / beta_esq
-
-    if "__iter__" not in dir(omega):
-        omega = [omega]
-
-    if sim:
-        open(f"data/{datafile}", "w").close() # clear file
-        for method_ in method:
-            for w in omega:
-                subprocess.run(f"./main.out {n}{eps}{rho_max}{w}{method_} {n} {eps} {rho_max} {method_} {w} {datafile}".split())
-
-    sols = read_data(datafile)
-    for method_ in method:
-        for w in omega:
-            data = sols[f"{n}{eps}{rho_max}{w}{method_}"]
-            vals = data.eigvals
-            vecs = data.eigvecs
-            vecs /= np.linalg.norm(vecs, axis=0)
-            vecs, vals = mat_sort_by_array(vecs, vals)
-            rho = np.linspace(0, data.pmax, data.n)
-
-            for i in range(1):
-                print(np.linalg.norm(vecs[:, i]))
-                plt.plot(rho, vecs[:, i] ** 2)
-
-
 
 
 if __name__ == "__main__":
