@@ -219,7 +219,7 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
             V0 = 3/2 * (omega_r / 2) ** (2 / 3)
             we = np.sqrt(3) * omega_r
 
-            vals = [V0 + we * (m + 0.5) for m in range(n)]
+            vals = [V0 + we * (m + 0.5) for m in range(1,n+1)]
             vec = (we / np.pi) ** (1/4) * np.exp(-we / 2 * (r - r0) ** 2)
             return vals, vec
 
@@ -258,13 +258,14 @@ def analytical_comparison(n=np.arange(10, 151, 10), eps=12, rhomax=[1,5,5], omeg
 
                 avals, avec = analytic(_n, met, rho, w)
                 avec /= np.linalg.norm(avec)
+                
                 # err_val = sum(abs(vals - avals) / avals)
                 # err_vec = sum(abs(vec - avec) / avec)
 
                 # error[met][-1]["err"].append([err_val, err_vec])
             fig, ax = plt.subplots(1,1,dpi=175, frameon=True)
             ax.plot(rho, vec, "r", lw=5, label=f"Eigenvector for {prob[met]}. $\lambda$ = {round(min(vals), 4)}, $\omega_r$ = {w}")
-            ax.plot(rho, avec, "k", lw=5, label=f"Analytic eigenvector")
+            ax.plot(rho+0.25, avec, "k", lw=5, label=f"Analytic eigenvector")
 
         plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
         plt.tick_params(top='on', bottom='on', left='on', right='on', labelleft='on', labelbottom='on')
